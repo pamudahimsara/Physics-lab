@@ -464,7 +464,7 @@ footer {
   <div class="sim-layout">
     <div class="canvas-card">
       <div class="canvas-header">
-        <div class="canvas-title"><div class="live-dot"></div><span>Hall Effect — Current in +x, B in +z → force in ±y</span></div>
+        <div class="canvas-title"><div class="live-dot"></div><span>Hall Effect — Current in +x, B in +y → force in ±z</span></div>
         <div class="canvas-controls-top">
           <button class="btn-sm primary" onclick="hallReset()">Reset</button>
         </div>
@@ -542,7 +542,7 @@ footer {
             <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div> Charge carriers (moving)</div>
             <div class="legend-item"><div class="legend-dot" style="background:#f87171"></div> Positive Hall side</div>
             <div class="legend-item"><div class="legend-dot" style="background:#34d399"></div> Negative Hall side</div>
-            <div class="legend-line" style="background:#00d4aa"></div> B field arrows (z-axis)</div>
+            <div class="legend-item"><div class="legend-line" style="background:#00d4aa"></div> B field arrows (y-axis, upward)</div>
         </div>
       </div>
     </div>
@@ -741,7 +741,7 @@ footer {
           <div class="legend-item"><div class="legend-dot" style="background:#4f8eff"></div> Wire 2 (direction toggleable)</div>
           <div class="legend-item"><div class="legend-line" style="background:#f87171"></div> Repulsion force arrows</div>
           <div class="legend-item"><div class="legend-line" style="background:#34d399"></div> Attraction force arrows</div>
-          <div class="legend-line" style="background:rgba(167,139,250,0.4)"></div> Circular B field rings</div>
+          <div class="legend-item"><div class="legend-line" style="background:rgba(167,139,250,0.4)"></div> Circular B field rings</div>
         </div></div>
       </div>
     </div>
@@ -844,14 +844,14 @@ footer {
           <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div> Current-carrying coil</div>
           <div class="legend-item"><div class="legend-dot" style="background:#f87171"></div> Deflecting force arrows</div>
           <div class="legend-item"><div class="legend-dot" style="background:#34d399"></div> Pointer / indicator needle</div>
-          <div class="legend-line" style="background:#60a5fa"></div> Radial B field lines</div>
+          <div class="legend-item"><div class="legend-line" style="background:#60a5fa"></div> Radial B field lines</div>
         </div></div>
       </div>
     </div>
   </div>
 </div>
 
-<footer>PhysicsLab 3D v2.0 — All simulations use Three.js WebGL rendering &nbsp;·&nbsp; Equations based on SI units</footer>
+<footer>PhysicsLab 3D v2.0 — All simulations use Three.js WebGL rendering &nbsp;·&nbsp; Equations based on SI units &nbsp;·&nbsp; Designed for excellence by AXIRON · 2026</footer>
 
 <script>
 // ============================================================
@@ -871,11 +871,13 @@ function showSim(id) {
   document.querySelectorAll('.sim-section').forEach(s => s.classList.remove('active'));
   document.getElementById('sim-' + id).classList.add('active');
   stopAllLoops();
-  if (id === 'mag') initMag3D();
-  if (id === 'hall') initHall3D();
-  if (id === 'fbqv') initFBQV3D('crt');
-  if (id === 'cci') initCCI3D();
-  if (id === 'galv') initGalv3D();
+  requestAnimationFrame(() => {
+    if (id === 'mag') initMag3D();
+    if (id === 'hall') initHall3D();
+    if (id === 'fbqv') initFBQV3D('crt');
+    if (id === 'cci') initCCI3D();
+    if (id === 'galv') initGalv3D();
+  });
 }
 
 let animLoops = {};
@@ -896,19 +898,34 @@ function createBaseScene(bgColor = 0x050709) {
 
 function createRenderer(containerId) {
   const wrap = document.getElementById(containerId);
-  const w = wrap.clientWidth, h = wrap.clientHeight;
+  const w = wrap.clientWidth || wrap.offsetWidth || (window.innerWidth > 900 ? window.innerWidth - 420 : window.innerWidth - 32);
+  const h = 480;
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(w, h);
   renderer.shadowMap.enabled = true;
-  // Clear existing canvas
   while(wrap.querySelector('canvas')) wrap.removeChild(wrap.querySelector('canvas'));
   wrap.appendChild(renderer.domElement);
+  renderer.domElement.style.width = '100%';
+  renderer.domElement.style.height = '100%';
+  const ro = new ResizeObserver(() => {
+    const nw = wrap.clientWidth, nh = wrap.clientHeight;
+    if (nw > 0 && nh > 0) {
+      renderer.setSize(nw, nh);
+      if (renderer._camera) {
+        renderer._camera.aspect = nw / nh;
+        renderer._camera.updateProjectionMatrix();
+      }
+    }
+  });
+  ro.observe(wrap);
+  renderer._ro = ro;
   return renderer;
 }
 
 function createCamera(w, h, z = 8) {
-  const cam = new THREE.PerspectiveCamera(55, w/h, 0.01, 1000);
+  const safeW = w || 800, safeH = h || 480;
+  const cam = new THREE.PerspectiveCamera(55, safeW / safeH, 0.01, 1000);
   cam.position.set(4, 3, z);
   cam.lookAt(0, 0, 0);
   return cam;
@@ -1022,7 +1039,7 @@ function magSwitchMode(m) {
 
 function magReset() {
   if (animLoops.mag) { cancelAnimationFrame(animLoops.mag); delete animLoops.mag; }
-  if (magRenderer) { magRenderer.dispose(); }
+  if (magRenderer) { if (magRenderer._ro) magRenderer._ro.disconnect(); magRenderer.dispose(); }
   
   magScene = createBaseScene(0x050709);
   addLights(magScene);
@@ -1030,7 +1047,8 @@ function magReset() {
   
   const wrap = document.getElementById('mag-3d-wrap');
   magRenderer = createRenderer('mag-3d-wrap');
-  magCamera = createCamera(wrap.clientWidth, wrap.clientHeight, 9);
+  magCamera = createCamera(wrap.clientWidth || 800, 480, 9);
+  magRenderer._camera = magCamera;
   setupOrbit(magRenderer, magCamera);
 
   if (magMode === 'field') buildMagFieldScene();
@@ -1126,7 +1144,7 @@ function buildMagChargeScene() {
   const lbl = document.createElement('canvas'); lbl.width=256; lbl.height=64;
   const lctx = lbl.getContext('2d');
   lctx.fillStyle = 'rgba(167,139,250,0.8)'; lctx.font='20px Space Mono,monospace';
-  lctx.fillText('B field ⊗ into page', 10, 40);
+  lctx.fillText('B field ⊙ out of page', 10, 40);
   const ltex = new THREE.CanvasTexture(lbl);
   const lsp = new THREE.Sprite(new THREE.SpriteMaterial({map:ltex, transparent:true}));
   lsp.scale.set(3,0.75,1); lsp.position.set(2.5, 2.5, 0);
@@ -1187,7 +1205,7 @@ function updateMagScene() {
     
     magScene.add(magParticleGroup);
     
-    const radius_m = (1.67e-27 * magParticleSpeed*1e6) / (1.6e-19 * magFieldStrength);
+    const radius_m = (9.11e-31 * magParticleSpeed*1e6) / (1.6e-19 * magFieldStrength);
     document.getElementById('mag-ro-field').textContent = magFieldStrength.toFixed(2);
     document.getElementById('mag-ro-force').textContent = (1.6e-19 * magParticleSpeed*1e6 * magFieldStrength).toExponential(2);
     document.getElementById('mag-ro-vel').textContent = magParticleSpeed.toFixed(1);
@@ -1197,7 +1215,7 @@ function updateMagScene() {
     magScene.children.forEach(c => {
       if (c.userData.isSolLine) c.material.opacity = 0.4 + 0.2 * Math.sin(t * 2 + c.userData.phase);
     });
-    const Bval = (4*Math.PI*1e-7 * magSolCurrent * magSolTurns / 3.2).toFixed(5);
+    const Bval = (4*Math.PI*1e-7 * magSolCurrent * (magSolTurns / 4.0)).toFixed(5); // B = μ₀·n·I, n = N/L, L=4
     document.getElementById('mag-ro-field').textContent = parseFloat(Bval).toExponential(2);
   }
 }
@@ -1281,7 +1299,7 @@ function updateHallReadouts() {
 
 function hallReset() {
   if (animLoops.hall) { cancelAnimationFrame(animLoops.hall); delete animLoops.hall; }
-  if (hallRenderer) hallRenderer.dispose();
+  if (hallRenderer) { if (hallRenderer._ro) hallRenderer._ro.disconnect(); hallRenderer.dispose(); }
   
   hallScene = createBaseScene(0x050709);
   addLights(hallScene);
@@ -1289,7 +1307,8 @@ function hallReset() {
   
   const wrap = document.getElementById('hall-3d-wrap');
   hallRenderer = createRenderer('hall-3d-wrap');
-  hallCamera = createCamera(wrap.clientWidth, wrap.clientHeight, 9);
+  hallCamera = createCamera(wrap.clientWidth || 800, 480, 9);
+  hallRenderer._camera = hallCamera;
   setupOrbit(hallRenderer, hallCamera);
   
   buildHallScene();
@@ -1317,34 +1336,38 @@ function buildHallScene() {
   const edges = new THREE.LineSegments(edgesGeo, edgesMat);
   hallScene.add(edges);
   
-  // B field arrows (along +z)
+  // B field arrows pointing upward (+y) through the slab
+  // Setup: I in +x, B in +y → Lorentz force on carriers is in ±z
   for (let x = -2; x <= 2; x += 1) {
-    const arr = makeArrow(new THREE.Vector3(0, 0, 1), new THREE.Vector3(x, 0, -2.5), 1.5, 0x00d4aa, 0.2);
+    const arr = makeArrow(new THREE.Vector3(0, 1, 0), new THREE.Vector3(x, -1.5, 0), 2.0, 0x00d4aa, 0.22);
     hallScene.add(arr);
   }
   // B label
-  addTextSprite(hallScene, 'B →(+z)', new THREE.Vector3(-3, 1.5, 0), '#00d4aa', 20);
+  addTextSprite(hallScene, 'B ↑ (+y)', new THREE.Vector3(-3.5, 0.5, 0), '#00d4aa', 20);
   
-  // Current arrow (along +x)
-  magScene; // just accessing to avoid lint
+  // Current arrow (along +x), conventional current direction
   const cArr = makeArrow(new THREE.Vector3(1, 0, 0), new THREE.Vector3(-3.5, 0, 0), 2, 0xfbbf24, 0.25);
   hallScene.add(cArr);
-  addTextSprite(hallScene, 'I (+x)', new THREE.Vector3(-4, 0.8, 0), '#fbbf24', 18);
+  addTextSprite(hallScene, 'I (+x)', new THREE.Vector3(-4, 0.9, 0), '#fbbf24', 18);
   
-  // Hall side indicators
-  const plusGeo = new THREE.PlaneGeometry(1, 0.7);
-  const plusMat = new THREE.MeshBasicMaterial({ color: 0xf87171, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
+  // Hall accumulation faces: for n-type electrons deflect to +z face (high z = negative Hall side)
+  // n-type: electrons go +z → +z face becomes negative, -z face becomes positive
+  // V_H = V(−z) − V(+z) > 0 for n-type (conventional: low-z face is +)
+  const plusGeo = new THREE.PlaneGeometry(4.5, 0.75);
+  const plusMat = new THREE.MeshBasicMaterial({ color: 0xf87171, transparent: true, opacity: 0.45, side: THREE.DoubleSide });
   const plusPlane = new THREE.Mesh(plusGeo, plusMat);
-  plusPlane.position.set(0, 0.4, 1.05);
+  plusPlane.rotation.x = Math.PI/2;
+  plusPlane.position.set(0, 0.41, -1.0); // bottom face of slab top surface at z=-1 (low-z)
   hallScene.add(plusPlane);
-  addTextSprite(hallScene, 'V_H +', new THREE.Vector3(1.5, 1.2, 1.2), '#f87171', 16);
+  addTextSprite(hallScene, 'V_H + (n-type)', new THREE.Vector3(2.2, 0.9, -1.3), '#f87171', 15);
   
-  const minusGeo = new THREE.PlaneGeometry(1, 0.7);
-  const minusMat = new THREE.MeshBasicMaterial({ color: 0x34d399, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
+  const minusGeo = new THREE.PlaneGeometry(4.5, 0.75);
+  const minusMat = new THREE.MeshBasicMaterial({ color: 0x34d399, transparent: true, opacity: 0.45, side: THREE.DoubleSide });
   const minusPlane = new THREE.Mesh(minusGeo, minusMat);
-  minusPlane.position.set(0, 0.4, -1.05);
+  minusPlane.rotation.x = Math.PI/2;
+  minusPlane.position.set(0, 0.41, 1.0); // high-z face
   hallScene.add(minusPlane);
-  addTextSprite(hallScene, 'V_H −', new THREE.Vector3(1.5, 1.2, -1.2), '#34d399', 16);
+  addTextSprite(hallScene, 'V_H − (n-type)', new THREE.Vector3(2.2, 0.9, 1.3), '#34d399', 15);
   
   // Init particles
   hallParticles = [];
@@ -1376,7 +1399,8 @@ function addTextSprite(scene, text, pos, color='#ffffff', size=18) {
 function updateHallScene() {
   const t = Date.now() * 0.001;
   // Animate particles drifting in +x, deflected in ±y by Hall force
-  const deflection = hallB * hallI * 0.3 * (hallType === 'n' ? -1 : 1);
+  // n-type: electrons deflect to +z; p-type: holes deflect to -z
+  const deflection = hallB * hallI * 0.3 * (hallType === 'n' ? 1 : -1);
   
   if (hallParticleGroup) hallScene.remove(hallParticleGroup);
   hallParticleGroup = new THREE.Group();
@@ -1453,7 +1477,7 @@ function fbqvResetParticle() {
 
 function fbqvReset() {
   if (animLoops.fbqv) { cancelAnimationFrame(animLoops.fbqv); delete animLoops.fbqv; }
-  if (fbqvRenderer) fbqvRenderer.dispose();
+  if (fbqvRenderer) { if (fbqvRenderer._ro) fbqvRenderer._ro.disconnect(); fbqvRenderer.dispose(); }
   
   fbqvScene = createBaseScene(0x050709);
   addLights(fbqvScene);
@@ -1461,7 +1485,8 @@ function fbqvReset() {
   
   const wrap = document.getElementById('fbqv-3d-wrap');
   fbqvRenderer = createRenderer('fbqv-3d-wrap');
-  fbqvCamera = createCamera(wrap.clientWidth, wrap.clientHeight, 9);
+  fbqvCamera = createCamera(wrap.clientWidth || 800, 480, 9);
+  fbqvRenderer._camera = fbqvCamera;
   setupOrbit(fbqvRenderer, fbqvCamera);
   
   fbqvResetParticle();
@@ -1748,7 +1773,7 @@ function buildCCIGroup() {
 
 function cciReset() {
   if (animLoops.cci) { cancelAnimationFrame(animLoops.cci); delete animLoops.cci; }
-  if (cciRenderer) cciRenderer.dispose();
+  if (cciRenderer) { if (cciRenderer._ro) cciRenderer._ro.disconnect(); cciRenderer.dispose(); }
   
   cciScene = createBaseScene(0x050709);
   addLights(cciScene);
@@ -1756,7 +1781,8 @@ function cciReset() {
   
   const wrap = document.getElementById('cci-3d-wrap');
   cciRenderer = createRenderer('cci-3d-wrap');
-  cciCamera = createCamera(wrap.clientWidth, wrap.clientHeight, 9);
+  cciCamera = createCamera(wrap.clientWidth || 800, 480, 9);
+  cciRenderer._camera = cciCamera;
   setupOrbit(cciRenderer, cciCamera);
   
   buildCCIGroup();
@@ -1808,7 +1834,7 @@ function updateGalvReadouts() {
 
 function galvReset() {
   if (animLoops.galv) { cancelAnimationFrame(animLoops.galv); delete animLoops.galv; }
-  if (galvRenderer) galvRenderer.dispose();
+  if (galvRenderer) { if (galvRenderer._ro) galvRenderer._ro.disconnect(); galvRenderer.dispose(); }
   
   galvScene = createBaseScene(0x050709);
   addLights(galvScene);
@@ -1816,7 +1842,8 @@ function galvReset() {
   
   const wrap = document.getElementById('galv-3d-wrap');
   galvRenderer = createRenderer('galv-3d-wrap');
-  galvCamera = createCamera(wrap.clientWidth, wrap.clientHeight, 10);
+  galvCamera = createCamera(wrap.clientWidth || 800, 480, 10);
+  galvRenderer._camera = galvCamera;
   setupOrbit(galvRenderer, galvCamera);
   
   buildGalvScene();
