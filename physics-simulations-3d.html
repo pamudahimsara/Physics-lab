@@ -1,0 +1,1969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhysicsLab 3D — Interactive Simulations</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root {
+  --bg: #070910;
+  --bg2: #0f1220;
+  --bg3: #161b2e;
+  --surface: #1c2236;
+  --surface2: #222840;
+  --border: rgba(120,140,255,0.10);
+  --border2: rgba(120,140,255,0.22);
+  --accent: #4f8eff;
+  --accent2: #7c5cfc;
+  --accent3: #00d4aa;
+  --warn: #ff7b4b;
+  --text: #e8eaf6;
+  --text2: #9ba3c4;
+  --text3: #4a5275;
+  --mono: 'Space Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+  --glow: 0 0 28px rgba(79,142,255,0.2);
+  --glow2: 0 0 18px rgba(0,212,170,0.15);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* NAV */
+nav {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(7,9,16,0.95);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex; align-items: center; gap: 2rem;
+  height: 56px;
+}
+.nav-logo {
+  font-family: var(--mono);
+  font-size: 13px; font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  display: flex; align-items: center; gap: 8px;
+}
+.nav-logo svg { width: 20px; height: 20px; }
+.nav-badge {
+  font-size: 9px; font-family: var(--mono); font-weight: 700;
+  background: rgba(0,212,170,0.15); color: var(--accent3);
+  border: 1px solid rgba(0,212,170,0.25);
+  padding: 2px 7px; border-radius: 4px; letter-spacing: 0.1em;
+}
+.nav-tabs { display: flex; gap: 4px; margin-left: auto; }
+.nav-tab {
+  font-size: 13px; font-weight: 500; color: var(--text2);
+  padding: 6px 14px; border-radius: 6px;
+  background: none; border: none; cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+  font-family: var(--sans);
+}
+.nav-tab:hover { color: var(--text); background: var(--surface); }
+.nav-tab.active { color: var(--accent); background: rgba(79,142,255,0.1); }
+
+/* HERO */
+.hero {
+  padding: 4rem 2rem 2rem;
+  text-align: center;
+  position: relative;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(79,142,255,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(79,142,255,0.1); border: 1px solid rgba(79,142,255,0.2);
+  color: var(--accent); font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 4px 14px; border-radius: 20px;
+  font-family: var(--mono); margin-bottom: 1.25rem;
+}
+.hero h1 {
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 300; letter-spacing: -0.02em; line-height: 1.1;
+  color: var(--text); margin-bottom: 0.75rem;
+}
+.hero h1 span { color: var(--accent); font-weight: 600; }
+.hero h1 em { color: var(--accent3); font-style: normal; font-weight: 600; }
+.hero p { font-size: 1rem; color: var(--text2); max-width: 560px; margin: 0 auto 2.5rem; line-height: 1.7; }
+
+/* TOPIC CARDS */
+.topics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  max-width: 1100px; margin: 0 auto;
+  padding: 0 2rem 3rem;
+}
+.topic-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px; padding: 1.25rem;
+  cursor: pointer; transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  text-align: left; position: relative; overflow: hidden;
+}
+.topic-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0; transition: opacity 0.2s;
+}
+.topic-card:hover { border-color: var(--border2); transform: translateY(-3px); box-shadow: var(--glow); }
+.topic-card:hover::before { opacity: 1; }
+.topic-card.active { border-color: var(--accent); background: rgba(79,142,255,0.07); }
+.topic-icon { font-size: 1.6rem; margin-bottom: 0.5rem; }
+.topic-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.topic-desc { font-size: 12px; color: var(--text3); line-height: 1.55; }
+.topic-badge {
+  display: inline-block; margin-top: 8px;
+  font-size: 10px; font-family: var(--mono);
+  padding: 2px 8px; border-radius: 4px; font-weight: 700;
+}
+.badge-live { background: rgba(0,212,170,0.15); color: var(--accent3); }
+.badge-3d { background: rgba(124,92,252,0.2); color: #a78bfa; }
+.badge-soon { background: rgba(74,82,117,0.3); color: var(--text3); }
+
+/* SIMULATION CONTAINER */
+.sim-section { display: none; padding: 0 2rem 4rem; }
+.sim-section.active { display: block; }
+
+.sim-layout {
+  display: grid;
+  grid-template-columns: 1fr 370px;
+  gap: 20px;
+  max-width: 1200px; margin: 0 auto;
+}
+@media (max-width: 900px) { .sim-layout { grid-template-columns: 1fr; } }
+
+/* CANVAS CARD */
+.canvas-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden;
+  position: relative;
+}
+.canvas-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.canvas-title {
+  font-size: 13px; font-weight: 600; color: var(--text);
+  display: flex; align-items: center; gap: 8px;
+}
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent3);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.75)} }
+.canvas-controls-top { display: flex; gap: 8px; align-items: center; }
+.btn-sm {
+  font-size: 12px; font-family: var(--sans); font-weight: 500;
+  padding: 5px 12px; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--border2); background: var(--surface);
+  color: var(--text2); transition: all 0.2s;
+}
+.btn-sm:hover { color: var(--text); border-color: var(--accent); }
+.btn-sm.primary { background: var(--accent); color: #fff; border-color: transparent; }
+.btn-sm.primary:hover { background: #6aa0ff; }
+
+/* 3D canvas container */
+.canvas-3d-wrap {
+  width: 100%; height: 480px;
+  background: #050709;
+  position: relative; overflow: hidden;
+}
+.canvas-3d-wrap canvas {
+  display: block; width: 100% !important; height: 100% !important;
+}
+.canvas-hint {
+  position: absolute; bottom: 12px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px; color: var(--text3); font-family: var(--mono);
+  background: rgba(7,9,16,0.7); padding: 4px 12px; border-radius: 20px;
+  pointer-events: none;
+}
+
+/* Legacy 2D canvas */
+canvas#magCanvas {
+  display: block; width: 100%; height: 480px;
+  background: #070910;
+  cursor: crosshair;
+}
+
+/* SIDEBAR */
+.sidebar { display: flex; flex-direction: column; gap: 14px; }
+
+/* PANEL */
+.panel {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden;
+}
+.panel-header {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text3);
+  font-family: var(--mono);
+}
+.panel-body { padding: 1rem; }
+
+/* CONTROLS */
+.ctrl-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 13px;
+}
+.ctrl-row:last-child { margin-bottom: 0; }
+.ctrl-label {
+  font-size: 12px; color: var(--text2); min-width: 105px;
+  font-weight: 500;
+}
+.ctrl-row input[type=range] {
+  flex: 1; -webkit-appearance: none; appearance: none;
+  height: 3px; border-radius: 2px;
+  background: var(--surface2); outline: none;
+}
+.ctrl-row input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 13px; height: 13px;
+  border-radius: 50%; background: var(--accent);
+  cursor: pointer; border: 2px solid var(--bg);
+  box-shadow: 0 0 8px rgba(79,142,255,0.5);
+}
+.ctrl-val {
+  font-family: var(--mono); font-size: 11px; color: var(--accent);
+  min-width: 40px; text-align: right;
+}
+.seg-btns { display: flex; gap: 0; }
+.seg-btn {
+  flex: 1; padding: 5px 0; font-size: 12px; font-weight: 500;
+  border: 1px solid var(--border2); background: var(--surface);
+  color: var(--text2); cursor: pointer; font-family: var(--sans);
+  transition: all 0.15s;
+}
+.seg-btn:first-child { border-radius: 6px 0 0 6px; }
+.seg-btn:last-child { border-radius: 0 6px 6px 0; }
+.seg-btn + .seg-btn { border-left: none; }
+.seg-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* EQUATIONS */
+.eq-block {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 10px; padding: 0.875rem 1rem;
+  margin-bottom: 10px;
+}
+.eq-block:last-child { margin-bottom: 0; }
+.eq-name {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--accent2);
+  font-family: var(--mono); margin-bottom: 6px;
+}
+.eq-formula {
+  font-family: var(--mono); font-size: 14px; font-weight: 700;
+  color: var(--accent); letter-spacing: 0.02em;
+  margin-bottom: 6px;
+}
+.eq-desc { font-size: 12px; color: var(--text2); line-height: 1.6; }
+.eq-vars { margin-top: 8px; display: flex; flex-direction: column; gap: 3px; }
+.eq-var {
+  font-size: 11px; color: var(--text3);
+  display: flex; gap: 6px;
+}
+.eq-var b { font-family: var(--mono); color: var(--text2); font-weight: 400; }
+
+/* READOUTS */
+.readout-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.readout {
+  background: var(--bg3); border-radius: 8px; padding: 10px;
+  border: 1px solid var(--border);
+}
+.readout-label { font-size: 10px; color: var(--text3); font-family: var(--mono); margin-bottom: 4px; }
+.readout-val { font-size: 16px; font-weight: 600; font-family: var(--mono); color: var(--accent3); }
+.readout-unit { font-size: 10px; color: var(--text3); font-family: var(--mono); }
+
+/* LEGEND */
+.legend { display: flex; flex-direction: column; gap: 6px; }
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text2); }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.legend-line { width: 20px; height: 2px; flex-shrink: 0; }
+
+/* SECTION HEADING */
+.section-head {
+  max-width: 1200px; margin: 0 auto;
+  padding: 1.5rem 0 1.25rem;
+  display: flex; align-items: center; gap: 12px;
+}
+.section-head h2 { font-size: 1.2rem; font-weight: 600; color: var(--text); }
+.section-head p { font-size: 13px; color: var(--text2); margin-top: 2px; }
+
+/* TABS inside sim */
+.sim-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.sim-tab {
+  font-size: 12px; font-weight: 500; padding: 6px 14px;
+  border-radius: 8px; cursor: pointer; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text2);
+  font-family: var(--sans); transition: all 0.2s;
+}
+.sim-tab.active { border-color: var(--accent); color: var(--accent); background: rgba(79,142,255,0.08); }
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 2rem;
+  text-align: center; font-size: 11px; color: var(--text3);
+  font-family: var(--mono);
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+    </svg>
+    PhysicsLab
+    <span class="nav-badge">3D</span>
+  </a>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showHome()">Simulations</button>
+    <button class="nav-tab" onclick="alert('Coming soon!')">Optics</button>
+    <button class="nav-tab" onclick="alert('Coming soon!')">Thermodynamics</button>
+  </div>
+</nav>
+
+<!-- HOME -->
+<div id="home-section">
+  <div class="hero">
+    <div class="hero-badge">
+      <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3.5"/></svg>
+      Interactive Physics Lab — Now in 3D
+    </div>
+    <h1>Understand Physics<br>Through <span>3D</span> <em>Simulation</em></h1>
+    <p>Fully interactive 3D simulations with real equations. Rotate, zoom, and explore magnetic phenomena — from classical field lines to Hall effect and galvanometers.</p>
+  </div>
+
+  <div class="topics-grid">
+    <div class="topic-card" onclick="showSim('mag')">
+      <div class="topic-icon">🧲</div>
+      <div class="topic-title">Magnetic Fields</div>
+      <div class="topic-desc">3D field lines, force on moving charges, solenoids.</div>
+      <span class="topic-badge badge-3d">⬡ 3D</span>
+    </div>
+    <div class="topic-card" onclick="showSim('hall')">
+      <div class="topic-icon">🔷</div>
+      <div class="topic-title">Hall Effect</div>
+      <div class="topic-desc">Charge separation in 3D conductor with transverse B field.</div>
+      <span class="topic-badge badge-3d">⬡ 3D</span>
+    </div>
+    <div class="topic-card" onclick="showSim('fbqv')">
+      <div class="topic-icon">⚡</div>
+      <div class="topic-title">F = BQV sin θ</div>
+      <div class="topic-desc">Explore Lorentz force applications: CRT beam, rail gun, mass spectrometer.</div>
+      <span class="topic-badge badge-3d">⬡ 3D</span>
+    </div>
+    <div class="topic-card" onclick="showSim('cci')">
+      <div class="topic-icon">⟷</div>
+      <div class="topic-title">Current–Current</div>
+      <div class="topic-desc">Force between parallel wires with visualized field interactions.</div>
+      <span class="topic-badge badge-3d">⬡ 3D</span>
+    </div>
+    <div class="topic-card" onclick="showSim('galv')">
+      <div class="topic-icon">🔭</div>
+      <div class="topic-title">Moving Coil Galvanometer</div>
+      <div class="topic-desc">Animated 3D coil deflecting against spring torque.</div>
+      <span class="topic-badge badge-3d">⬡ 3D</span>
+    </div>
+    <div class="topic-card" onclick="alert('Coming soon!')">
+      <div class="topic-icon">🌊</div>
+      <div class="topic-title">Wave Mechanics</div>
+      <div class="topic-desc">Interference, diffraction and standing waves.</div>
+      <span class="topic-badge badge-soon">Coming Soon</span>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MAGNETIC FIELDS ========== -->
+<div id="sim-mag" class="sim-section">
+  <div class="section-head">
+    <div>
+      <h2>🧲 Magnetic Fields — 3D</h2>
+      <p>Explore dipole fields, Lorentz force on charges, and solenoid field in interactive 3D.</p>
+    </div>
+    <button class="btn-sm" onclick="showHome()" style="margin-left:auto">← Back</button>
+  </div>
+  <div style="max-width:1200px;margin:0 auto;">
+    <div class="sim-tabs">
+      <button class="sim-tab active" onclick="magSwitchMode('field')">Field Lines</button>
+      <button class="sim-tab" onclick="magSwitchMode('charge')">Moving Charge</button>
+      <button class="sim-tab" onclick="magSwitchMode('solenoid')">Solenoid</button>
+    </div>
+  </div>
+  <div class="sim-layout">
+    <div class="canvas-card">
+      <div class="canvas-header">
+        <div class="canvas-title"><div class="live-dot"></div><span id="mag-canvas-label">3D Dipole Field</span></div>
+        <div class="canvas-controls-top">
+          <button class="btn-sm primary" onclick="magReset()">Reset</button>
+        </div>
+      </div>
+      <div class="canvas-3d-wrap" id="mag-3d-wrap">
+        <div class="canvas-hint">Drag to rotate · Scroll to zoom</div>
+      </div>
+    </div>
+    <div class="sidebar">
+      <div class="panel" id="mag-ctrl-panel">
+        <div class="panel-header" id="mag-ctrl-title">Controls</div>
+        <div class="panel-body" id="mag-ctrl-body"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">Live Readouts</div>
+        <div class="panel-body">
+          <div class="readout-grid">
+            <div class="readout"><div class="readout-label">FIELD</div><div class="readout-val" id="mag-ro-field">1.00</div><div class="readout-unit">Tesla</div></div>
+            <div class="readout"><div class="readout-label">FORCE</div><div class="readout-val" id="mag-ro-force">—</div><div class="readout-unit">Newtons</div></div>
+            <div class="readout"><div class="readout-label">VELOCITY</div><div class="readout-val" id="mag-ro-vel">—</div><div class="readout-unit">m/s ×10⁶</div></div>
+            <div class="readout"><div class="readout-label">RADIUS</div><div class="readout-val" id="mag-ro-radius">—</div><div class="readout-unit">meters</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel"><div class="panel-header">Equations</div><div class="panel-body" id="mag-eq-panel"></div></div>
+      <div class="panel"><div class="panel-header">Legend</div><div class="panel-body"><div class="legend" id="mag-legend-panel"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== HALL EFFECT ========== -->
+<div id="sim-hall" class="sim-section">
+  <div class="section-head">
+    <div>
+      <h2>🔷 Hall Effect — 3D</h2>
+      <p>Charge carriers deflect in a transverse magnetic field, creating a measurable Hall voltage.</p>
+    </div>
+    <button class="btn-sm" onclick="showHome()" style="margin-left:auto">← Back</button>
+  </div>
+  <div class="sim-layout">
+    <div class="canvas-card">
+      <div class="canvas-header">
+        <div class="canvas-title"><div class="live-dot"></div><span>Hall Effect — Current in +x, B in +z → force in ±y</span></div>
+        <div class="canvas-controls-top">
+          <button class="btn-sm primary" onclick="hallReset()">Reset</button>
+        </div>
+      </div>
+      <div class="canvas-3d-wrap" id="hall-3d-wrap">
+        <div class="canvas-hint">Drag to rotate · Scroll to zoom</div>
+      </div>
+    </div>
+    <div class="sidebar">
+      <div class="panel">
+        <div class="panel-header">Controls</div>
+        <div class="panel-body">
+          <div class="ctrl-row">
+            <span class="ctrl-label">B Field (z)</span>
+            <input type="range" min="0.1" max="3" step="0.1" value="1.0" oninput="hallSetB(+this.value);document.getElementById('hall-bval').textContent=this.value+'T'">
+            <span class="ctrl-val" id="hall-bval">1.0T</span>
+          </div>
+          <div class="ctrl-row">
+            <span class="ctrl-label">Current (I)</span>
+            <input type="range" min="0.5" max="5" step="0.1" value="2.0" oninput="hallSetI(+this.value);document.getElementById('hall-ival').textContent=this.value+'A'">
+            <span class="ctrl-val" id="hall-ival">2.0A</span>
+          </div>
+          <div class="ctrl-row">
+            <span class="ctrl-label">Carrier Type</span>
+            <div class="seg-btns" style="flex:1">
+              <button class="seg-btn active" id="hall-n" onclick="hallSetType('n')">n-type (−)</button>
+              <button class="seg-btn" id="hall-p" onclick="hallSetType('p')">p-type (+)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">Readouts</div>
+        <div class="panel-body">
+          <div class="readout-grid">
+            <div class="readout"><div class="readout-label">HALL VOLTAGE</div><div class="readout-val" id="hall-ro-vh">0.00</div><div class="readout-unit">Volts</div></div>
+            <div class="readout"><div class="readout-label">B FIELD</div><div class="readout-val" id="hall-ro-b">1.00</div><div class="readout-unit">Tesla</div></div>
+            <div class="readout"><div class="readout-label">CURRENT</div><div class="readout-val" id="hall-ro-i">2.00</div><div class="readout-unit">Amperes</div></div>
+            <div class="readout"><div class="readout-label">DEFLECTION</div><div class="readout-val" id="hall-ro-d">med</div><div class="readout-unit">level</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">Equations</div>
+        <div class="panel-body">
+          <div class="eq-block">
+            <div class="eq-name">Hall Voltage</div>
+            <div class="eq-formula">V_H = IB / (nqt)</div>
+            <div class="eq-desc">Transverse voltage developed when current-carrying conductor sits in a perpendicular B field.</div>
+            <div class="eq-vars">
+              <div class="eq-var"><b>I</b> = current (A)</div>
+              <div class="eq-var"><b>B</b> = magnetic flux density (T)</div>
+              <div class="eq-var"><b>n</b> = charge carrier density (m⁻³)</div>
+              <div class="eq-var"><b>t</b> = conductor thickness (m)</div>
+            </div>
+          </div>
+          <div class="eq-block">
+            <div class="eq-name">Lorentz + Electric Balance</div>
+            <div class="eq-formula">qE_H = qv_d B</div>
+            <div class="eq-desc">Equilibrium when the Hall electric field force exactly balances the magnetic Lorentz force on carriers.</div>
+          </div>
+          <div class="eq-block">
+            <div class="eq-name">Hall Coefficient</div>
+            <div class="eq-formula">R_H = 1 / (nq)</div>
+            <div class="eq-desc">Positive for p-type semiconductors (hole carriers), negative for n-type (electron carriers).</div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">Legend</div>
+        <div class="panel-body">
+          <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#4f8eff"></div> Conductor slab</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div> Current flow (+x direction)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div> Charge carriers (moving)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#f87171"></div> Positive Hall side</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#34d399"></div> Negative Hall side</div>
+            <div class="legend-line" style="background:#00d4aa"></div> B field arrows (z-axis)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== F = BQV sin θ ========== -->
+<div id="sim-fbqv" class="sim-section">
+  <div class="section-head">
+    <div>
+      <h2>⚡ F = BQV sin θ — Applications</h2>
+      <p>Explore real-world applications of the Lorentz force in 3D: CRT beam deflection, cyclotron, and rail gun.</p>
+    </div>
+    <button class="btn-sm" onclick="showHome()" style="margin-left:auto">← Back</button>
+  </div>
+  <div style="max-width:1200px;margin:0 auto;">
+    <div class="sim-tabs">
+      <button class="sim-tab active" onclick="fbqvSwitch('crt')">CRT Deflection</button>
+      <button class="sim-tab" onclick="fbqvSwitch('cyclotron')">Cyclotron</button>
+      <button class="sim-tab" onclick="fbqvSwitch('railgun')">Rail Gun</button>
+    </div>
+  </div>
+  <div class="sim-layout">
+    <div class="canvas-card">
+      <div class="canvas-header">
+        <div class="canvas-title"><div class="live-dot"></div><span id="fbqv-label">CRT Beam Deflection</span></div>
+        <div class="canvas-controls-top">
+          <button class="btn-sm primary" onclick="fbqvReset()">Reset</button>
+        </div>
+      </div>
+      <div class="canvas-3d-wrap" id="fbqv-3d-wrap">
+        <div class="canvas-hint">Drag to rotate · Scroll to zoom</div>
+      </div>
+    </div>
+    <div class="sidebar">
+      <div class="panel">
+        <div class="panel-header">Controls</div>
+        <div class="panel-body" id="fbqv-ctrl-body">
+          <div class="ctrl-row">
+            <span class="ctrl-label">B Field (T)</span>
+            <input type="range" min="0.1" max="3" step="0.1" value="1.0" oninput="fbqvSetB(+this.value);document.getElementById('fbqv-bval').textContent=this.value+'T'">
+            <span class="ctrl-val" id="fbqv-bval">1.0T</span>
+          </div>
+          <div class="ctrl-row">
+            <span class="ctrl-label">Velocity (×10⁶)</span>
+            <input type="range" min="0.5" max="5" step="0.1" value="2.0" oninput="fbqvSetV(+this.value);document.getElementById('fbqv-vval').textContent=this.value">
+            <span class="ctrl-val" id="fbqv-vval">2.0</span>
+          </div>
+          <div class="ctrl-row">
+            <span class="ctrl-label">Angle θ (°)</span>
+            <input type="range" min="0" max="180" step="1" value="90" oninput="fbqvSetAngle(+this.value);document.getElementById('fbqv-aval').textContent=this.value+'°'">
+            <span class="ctrl-val" id="fbqv-aval">90°</span>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">Readouts</div>
+        <div class="panel-body">
+          <div class="readout-grid">
+            <div class="readout"><div class="readout-label">FORCE</div><div class="readout-val" id="fbqv-ro-f">—</div><div class="readout-unit">×10⁻¹³ N</div></div>
+            <div class="readout"><div class="readout-label">sin θ</div><div class="readout-val" id="fbqv-ro-sin">1.00</div><div class="readout-unit">—</div></div>
+            <div class="readout"><div class="readout-label">RADIUS</div><div class="readout-val" id="fbqv-ro-r">—</div><div class="readout-unit">meters</div></div>
+            <div class="readout"><div class="readout-label">MODE</div><div class="readout-val" id="fbqv-ro-mode" style="font-size:11px">CRT</div><div class="readout-unit">—</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">Equations</div>
+        <div class="panel-body">
+          <div class="eq-block">
+            <div class="eq-name">Lorentz Force Magnitude</div>
+            <div class="eq-formula">F = BQV sin θ</div>
+            <div class="eq-desc">Force is maximum when velocity is perpendicular to B (θ=90°) and zero when parallel (θ=0°).</div>
+            <div class="eq-vars">
+              <div class="eq-var"><b>B</b> = magnetic flux density (T)</div>
+              <div class="eq-var"><b>Q</b> = charge (C) = 1.6×10⁻¹⁹</div>
+              <div class="eq-var"><b>V</b> = velocity (m/s)</div>
+              <div class="eq-var"><b>θ</b> = angle between v and B</div>
+            </div>
+          </div>
+          <div class="eq-block">
+            <div class="eq-name">CRT Application</div>
+            <div class="eq-formula">y = (eBL²)/(2mv²) · V_d</div>
+            <div class="eq-desc">Screen deflection of an electron beam. Magnetic deflection coils use this principle.</div>
+          </div>
+          <div class="eq-block">
+            <div class="eq-name">Cyclotron Radius</div>
+            <div class="eq-formula">r = mv / (|q|B)</div>
+            <div class="eq-desc">Larger v → wider orbit. Stronger B → tighter orbit.</div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">Legend</div>
+        <div class="panel-body"><div class="legend" id="fbqv-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div> Charged particle</div>
+          <div class="legend-item"><div class="legend-line" style="background:#4ade80"></div> Velocity vector</div>
+          <div class="legend-item"><div class="legend-line" style="background:#f87171"></div> Lorentz force</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div> B field region</div>
+          <div class="legend-item"><div class="legend-line" style="background:rgba(167,139,250,0.4)"></div> Particle trail</div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== CURRENT-CURRENT ========== -->
+<div id="sim-cci" class="sim-section">
+  <div class="section-head">
+    <div>
+      <h2>⟷ Current–Current Interaction</h2>
+      <p>Two parallel wires carrying current attract or repel via their combined magnetic fields.</p>
+    </div>
+    <button class="btn-sm" onclick="showHome()" style="margin-left:auto">← Back</button>
+  </div>
+  <div class="sim-layout">
+    <div class="canvas-card">
+      <div class="canvas-header">
+        <div class="canvas-title"><div class="live-dot"></div><span id="cci-label">Parallel Wires — Magnetic Force</span></div>
+        <div class="canvas-controls-top">
+          <button class="btn-sm primary" onclick="cciReset()">Reset</button>
+        </div>
+      </div>
+      <div class="canvas-3d-wrap" id="cci-3d-wrap">
+        <div class="canvas-hint">Drag to rotate · Scroll to zoom</div>
+      </div>
+    </div>
+    <div class="sidebar">
+      <div class="panel">
+        <div class="panel-header">Controls</div>
+        <div class="panel-body">
+          <div class="ctrl-row">
+            <span class="ctrl-label">Current I₁ (A)</span>
+            <input type="range" min="1" max="10" step="0.5" value="5" oninput="cciSetI1(+this.value);document.getElementById('cci-i1val').textContent=this.value+'A'">
+            <span class="ctrl-val" id="cci-i1val">5.0A</span>
+          </div>
+          <div class="ctrl-row">
+            <span class="ctrl-label">Current I₂ (A)</span>
+            <input type="range" min="1" max="10" step="0.5" value="5" oninput="cciSetI2(+this.value);document.getElementById('cci-i2val').textContent=this.value+'A'">
+            <span class="ctrl-val" id="cci-i2val">5.0A</span>
+          </div>
+          <div class="ctrl-row">
+            <span class="ctrl-label">Wire 2 Direction</span>
+            <div class="seg-btns" style="flex:1">
+              <button class="seg-btn active" id="cci-same" onclick="cciSetDir('same')">↑↑ Same</button>
+              <button class="seg-btn" id="cci-opp" onclick="cciSetDir('opp')">↑↓ Opposite</button>
+            </div>
+          </div>
+          <div class="ctrl-row">
+            <span class="ctrl-label">Separation (cm)</span>
+            <input type="range" min="1" max="8" step="0.5" value="3" oninput="cciSetSep(+this.value);document.getElementById('cci-sval').textContent=this.value+'cm'">
+            <span class="ctrl-val" id="cci-sval">3cm</span>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">Readouts</div>
+        <div class="panel-body">
+          <div class="readout-grid">
+            <div class="readout"><div class="readout-label">FORCE/LENGTH</div><div class="readout-val" id="cci-ro-f">—</div><div class="readout-unit">×10⁻⁶ N/m</div></div>
+            <div class="readout"><div class="readout-label">INTERACTION</div><div class="readout-val" id="cci-ro-type" style="font-size:11px">ATTRACT</div><div class="readout-unit">—</div></div>
+            <div class="readout"><div class="readout-label">B AT WIRE 2</div><div class="readout-val" id="cci-ro-b">—</div><div class="readout-unit">×10⁻⁵ T</div></div>
+            <div class="readout"><div class="readout-label">SEPARATION</div><div class="readout-val" id="cci-ro-sep">3.0</div><div class="readout-unit">cm</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">Equations</div>
+        <div class="panel-body">
+          <div class="eq-block">
+            <div class="eq-name">Force Between Wires</div>
+            <div class="eq-formula">F/L = μ₀I₁I₂ / (2πd)</div>
+            <div class="eq-desc">Force per unit length. Same-direction currents attract; opposite-direction currents repel.</div>
+            <div class="eq-vars">
+              <div class="eq-var"><b>μ₀</b> = 4π×10⁻⁷ H/m</div>
+              <div class="eq-var"><b>I₁, I₂</b> = currents (A)</div>
+              <div class="eq-var"><b>d</b> = wire separation (m)</div>
+            </div>
+          </div>
+          <div class="eq-block">
+            <div class="eq-name">B Field Around Wire</div>
+            <div class="eq-formula">B = μ₀I / (2πr)</div>
+            <div class="eq-desc">The circular magnetic field generated by each wire exerts a force on the other. Defined the Ampere until 2019.</div>
+          </div>
+          <div class="eq-block">
+            <div class="eq-name">Right-Hand Rule</div>
+            <div class="eq-formula">F = I L × B</div>
+            <div class="eq-desc">Curl fingers in direction of B around wire 1; if current in wire 2 is parallel to that B-force direction, the wires attract.</div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">Legend</div>
+        <div class="panel-body"><div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div> Wire 1 (current up)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#4f8eff"></div> Wire 2 (direction toggleable)</div>
+          <div class="legend-item"><div class="legend-line" style="background:#f87171"></div> Repulsion force arrows</div>
+          <div class="legend-item"><div class="legend-line" style="background:#34d399"></div> Attraction force arrows</div>
+          <div class="legend-line" style="background:rgba(167,139,250,0.4)"></div> Circular B field rings</div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== GALVANOMETER ========== -->
+<div id="sim-galv" class="sim-section">
+  <div class="section-head">
+    <div>
+      <h2>🔭 Moving Coil Galvanometer — 3D</h2>
+      <p>A current-carrying coil in a radial magnetic field: torque vs restoring spring determines deflection.</p>
+    </div>
+    <button class="btn-sm" onclick="showHome()" style="margin-left:auto">← Back</button>
+  </div>
+  <div class="sim-layout">
+    <div class="canvas-card">
+      <div class="canvas-header">
+        <div class="canvas-title"><div class="live-dot"></div><span>Coil deflection in radial B field</span></div>
+        <div class="canvas-controls-top">
+          <button class="btn-sm primary" onclick="galvReset()">Reset</button>
+        </div>
+      </div>
+      <div class="canvas-3d-wrap" id="galv-3d-wrap">
+        <div class="canvas-hint">Drag to rotate · Scroll to zoom</div>
+      </div>
+    </div>
+    <div class="sidebar">
+      <div class="panel">
+        <div class="panel-header">Controls</div>
+        <div class="panel-body">
+          <div class="ctrl-row">
+            <span class="ctrl-label">Current (mA)</span>
+            <input type="range" min="-10" max="10" step="0.5" value="4" oninput="galvSetI(+this.value);document.getElementById('galv-ival').textContent=this.value+'mA'">
+            <span class="ctrl-val" id="galv-ival">4mA</span>
+          </div>
+          <div class="ctrl-row">
+            <span class="ctrl-label">B Field (T)</span>
+            <input type="range" min="0.1" max="2" step="0.1" value="0.8" oninput="galvSetB(+this.value);document.getElementById('galv-bval').textContent=this.value+'T'">
+            <span class="ctrl-val" id="galv-bval">0.8T</span>
+          </div>
+          <div class="ctrl-row">
+            <span class="ctrl-label">Spring Const k</span>
+            <input type="range" min="0.5" max="5" step="0.1" value="2.0" oninput="galvSetK(+this.value);document.getElementById('galv-kval').textContent=this.value">
+            <span class="ctrl-val" id="galv-kval">2.0</span>
+          </div>
+          <div class="ctrl-row">
+            <span class="ctrl-label">Coil Turns N</span>
+            <input type="range" min="10" max="200" step="10" value="50" oninput="galvSetN(+this.value);document.getElementById('galv-nval').textContent=this.value">
+            <span class="ctrl-val" id="galv-nval">50</span>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">Readouts</div>
+        <div class="panel-body">
+          <div class="readout-grid">
+            <div class="readout"><div class="readout-label">DEFLECTION</div><div class="readout-val" id="galv-ro-def">18.0</div><div class="readout-unit">degrees</div></div>
+            <div class="readout"><div class="readout-label">TORQUE τ</div><div class="readout-val" id="galv-ro-tor">—</div><div class="readout-unit">×10⁻⁶ Nm</div></div>
+            <div class="readout"><div class="readout-label">CURRENT</div><div class="readout-val" id="galv-ro-i">4.0</div><div class="readout-unit">mA</div></div>
+            <div class="readout"><div class="readout-label">SENSITIVITY</div><div class="readout-val" id="galv-ro-s">—</div><div class="readout-unit">°/mA</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">Equations</div>
+        <div class="panel-body">
+          <div class="eq-block">
+            <div class="eq-name">Deflecting Torque</div>
+            <div class="eq-formula">τ = NBIA</div>
+            <div class="eq-desc">Torque on the coil. In a radial field B is always perpendicular to coil plane, so sin θ = 1 always.</div>
+            <div class="eq-vars">
+              <div class="eq-var"><b>N</b> = number of turns</div>
+              <div class="eq-var"><b>B</b> = radial field strength (T)</div>
+              <div class="eq-var"><b>I</b> = current through coil (A)</div>
+              <div class="eq-var"><b>A</b> = coil area (m²)</div>
+            </div>
+          </div>
+          <div class="eq-block">
+            <div class="eq-name">Restoring Torque</div>
+            <div class="eq-formula">τ_r = kθ</div>
+            <div class="eq-desc">The phosphor bronze suspension provides a restoring couple proportional to deflection angle.</div>
+          </div>
+          <div class="eq-block">
+            <div class="eq-name">Equilibrium</div>
+            <div class="eq-formula">θ = NBA·I / k</div>
+            <div class="eq-desc">Deflection is directly proportional to current — making the galvanometer scale uniform (linear).</div>
+          </div>
+          <div class="eq-block">
+            <div class="eq-name">Current Sensitivity</div>
+            <div class="eq-formula">S = θ/I = NBA/k</div>
+            <div class="eq-desc">Increased by: more turns N, stronger B, larger area A, weaker spring k.</div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">Legend</div>
+        <div class="panel-body"><div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div> Magnetic poles (N/S)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div> Current-carrying coil</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#f87171"></div> Deflecting force arrows</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#34d399"></div> Pointer / indicator needle</div>
+          <div class="legend-line" style="background:#60a5fa"></div> Radial B field lines</div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>PhysicsLab 3D v2.0 — All simulations use Three.js WebGL rendering &nbsp;·&nbsp; Equations based on SI units</footer>
+
+<script>
+// ============================================================
+// NAVIGATION
+// ============================================================
+let activeRenderer = null;
+function disposeRenderer(r) { if (r) { r.dispose(); } }
+
+function showHome() {
+  document.getElementById('home-section').style.display = '';
+  document.querySelectorAll('.sim-section').forEach(s => s.classList.remove('active'));
+  stopAllLoops();
+}
+
+function showSim(id) {
+  document.getElementById('home-section').style.display = 'none';
+  document.querySelectorAll('.sim-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sim-' + id).classList.add('active');
+  stopAllLoops();
+  if (id === 'mag') initMag3D();
+  if (id === 'hall') initHall3D();
+  if (id === 'fbqv') initFBQV3D('crt');
+  if (id === 'cci') initCCI3D();
+  if (id === 'galv') initGalv3D();
+}
+
+let animLoops = {};
+function stopAllLoops() {
+  Object.values(animLoops).forEach(id => cancelAnimationFrame(id));
+  animLoops = {};
+}
+
+// ============================================================
+// SHARED THREE.JS HELPERS
+// ============================================================
+function createBaseScene(bgColor = 0x050709) {
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(bgColor);
+  scene.fog = new THREE.FogExp2(bgColor, 0.08);
+  return scene;
+}
+
+function createRenderer(containerId) {
+  const wrap = document.getElementById(containerId);
+  const w = wrap.clientWidth, h = wrap.clientHeight;
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(w, h);
+  renderer.shadowMap.enabled = true;
+  // Clear existing canvas
+  while(wrap.querySelector('canvas')) wrap.removeChild(wrap.querySelector('canvas'));
+  wrap.appendChild(renderer.domElement);
+  return renderer;
+}
+
+function createCamera(w, h, z = 8) {
+  const cam = new THREE.PerspectiveCamera(55, w/h, 0.01, 1000);
+  cam.position.set(4, 3, z);
+  cam.lookAt(0, 0, 0);
+  return cam;
+}
+
+function addLights(scene) {
+  const ambient = new THREE.AmbientLight(0x223355, 2.5);
+  scene.add(ambient);
+  const dir = new THREE.DirectionalLight(0x6699ff, 3);
+  dir.position.set(5, 8, 5);
+  scene.add(dir);
+  const dir2 = new THREE.DirectionalLight(0x00d4aa, 1.5);
+  dir2.position.set(-5, -3, -5);
+  scene.add(dir2);
+}
+
+function addGridHelper(scene) {
+  const grid = new THREE.GridHelper(10, 20, 0x1a2240, 0x111830);
+  grid.position.y = -2.2;
+  scene.add(grid);
+}
+
+function setupOrbit(renderer, camera) {
+  let isDragging = false, prevX = 0, prevY = 0;
+  let phi = Math.PI/5, theta = Math.PI/4, radius = camera.position.length();
+  function updateCam() {
+    camera.position.x = radius * Math.sin(phi) * Math.cos(theta);
+    camera.position.y = radius * Math.cos(phi);
+    camera.position.z = radius * Math.sin(phi) * Math.sin(theta);
+    camera.lookAt(0, 0, 0);
+  }
+  const el = renderer.domElement;
+  el.addEventListener('mousedown', e => { isDragging = true; prevX = e.clientX; prevY = e.clientY; });
+  el.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    theta -= (e.clientX - prevX) * 0.01;
+    phi = Math.max(0.1, Math.min(Math.PI-0.1, phi + (e.clientY - prevY) * 0.01));
+    prevX = e.clientX; prevY = e.clientY; updateCam();
+  });
+  el.addEventListener('mouseup', () => isDragging = false);
+  el.addEventListener('mouseleave', () => isDragging = false);
+  el.addEventListener('wheel', e => { radius = Math.max(2, Math.min(20, radius + e.deltaY * 0.01)); updateCam(); e.preventDefault(); }, {passive:false});
+  // Touch
+  let lastTouch = null;
+  el.addEventListener('touchstart', e => { lastTouch = e.touches[0]; });
+  el.addEventListener('touchmove', e => {
+    if (!lastTouch) return;
+    const t = e.touches[0];
+    theta -= (t.clientX - lastTouch.clientX) * 0.01;
+    phi = Math.max(0.1, Math.min(Math.PI-0.1, phi + (t.clientY - lastTouch.clientY) * 0.01));
+    lastTouch = t; updateCam(); e.preventDefault();
+  }, {passive:false});
+  el.addEventListener('touchend', () => lastTouch = null);
+  updateCam();
+}
+
+function makeArrow(dir, origin, len, color, headLen=0.18) {
+  const hex = typeof color === 'number' ? color : parseInt(color.replace('#',''), 16);
+  const arrow = new THREE.ArrowHelper(dir.normalize(), origin, len, hex, headLen, headLen*0.5);
+  return arrow;
+}
+
+function makeTube(points, radius, color, opacity=1) {
+  const curve = new THREE.CatmullRomCurve3(points);
+  const geo = new THREE.TubeGeometry(curve, points.length*2, radius, 6, false);
+  const mat = new THREE.MeshPhongMaterial({ color, transparent: opacity < 1, opacity, emissive: color, emissiveIntensity: 0.3 });
+  return new THREE.Mesh(geo, mat);
+}
+
+// ============================================================
+// MAGNETIC FIELDS 3D
+// ============================================================
+let magScene, magRenderer, magCamera, magMode='field', magAnim;
+let magFieldStrength = 1.0, magParticleSpeed = 2.5, magParticleCharge = 1;
+let magSolTurns = 8, magSolCurrent = 1.0, magSolDir = 1;
+
+function magSwitchMode(m) {
+  magMode = m;
+  document.querySelectorAll('#sim-mag .sim-tab').forEach((t,i) => {
+    t.classList.toggle('active', ['field','charge','solenoid'][i] === m);
+  });
+  document.getElementById('mag-canvas-label').textContent = {field:'3D Dipole Field', charge:'Moving Charge in 3D B Field', solenoid:'Solenoid 3D Field'}[m];
+  
+  const cfgMap = {
+    field: {
+      title: 'Field Controls',
+      html: `<div class="ctrl-row"><span class="ctrl-label">Field Strength</span><input type="range" min="0.2" max="3" step="0.1" value="1.0" oninput="magFieldStrength=+this.value;document.getElementById('mag-fs-val').textContent=this.value+'×'"><span class="ctrl-val" id="mag-fs-val">1.0×</span></div>`,
+      equations: `<div class="eq-block"><div class="eq-name">Biot–Savart (dipole)</div><div class="eq-formula">B = μ₀/4π · m/r³</div><div class="eq-desc">Field from a magnetic dipole drops as inverse cube of distance.</div></div><div class="eq-block"><div class="eq-name">Superposition</div><div class="eq-formula">B_total = Σ Bᵢ</div><div class="eq-desc">Vector sum of all individual field contributions.</div></div>`,
+      legend: `<div class="legend-item"><div class="legend-dot" style="background:#f87171"></div> North pole</div><div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div> South pole</div><div class="legend-item"><div class="legend-line" style="background:linear-gradient(90deg,#f87171,#60a5fa)"></div> 3D field line tubes</div>`
+    },
+    charge: {
+      title: 'Particle Controls',
+      html: `<div class="ctrl-row"><span class="ctrl-label">Charge</span><div class="seg-btns" style="flex:1"><button class="seg-btn active" id="mag-chp" onclick="magParticleCharge=1;document.getElementById('mag-chp').classList.add('active');document.getElementById('mag-chn').classList.remove('active')">＋ Pos</button><button class="seg-btn" id="mag-chn" onclick="magParticleCharge=-1;document.getElementById('mag-chn').classList.add('active');document.getElementById('mag-chp').classList.remove('active')">− Neg</button></div></div><div class="ctrl-row"><span class="ctrl-label">Speed</span><input type="range" min="0.5" max="5" step="0.1" value="2.5" oninput="magParticleSpeed=+this.value;document.getElementById('mag-sp-val').textContent=this.value"><span class="ctrl-val" id="mag-sp-val">2.5</span></div><div class="ctrl-row"><span class="ctrl-label">B Field</span><input type="range" min="0.1" max="3" step="0.1" value="1.0" oninput="magFieldStrength=+this.value;document.getElementById('mag-bz-val').textContent=this.value+'T'"><span class="ctrl-val" id="mag-bz-val">1.0T</span></div>`,
+      equations: `<div class="eq-block"><div class="eq-name">Lorentz Force</div><div class="eq-formula">F = q(v × B)</div><div class="eq-desc">Force perpendicular to both velocity and field — produces circular/helical motion.</div></div><div class="eq-block"><div class="eq-name">Cyclotron Radius</div><div class="eq-formula">r = mv / (|q|B)</div><div class="eq-desc">Radius of circular orbit in 3D B field.</div></div>`,
+      legend: `<div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div> Particle</div><div class="legend-item"><div class="legend-line" style="background:#4ade80"></div> Velocity</div><div class="legend-item"><div class="legend-line" style="background:#f87171"></div> Lorentz Force</div><div class="legend-item"><div class="legend-line" style="background:rgba(167,139,250,0.4)"></div> Trail</div>`
+    },
+    solenoid: {
+      title: 'Solenoid Controls',
+      html: `<div class="ctrl-row"><span class="ctrl-label">Turns N</span><input type="range" min="2" max="16" step="1" value="8" oninput="magSolTurns=+this.value;document.getElementById('mag-st-val').textContent=this.value"><span class="ctrl-val" id="mag-st-val">8</span></div><div class="ctrl-row"><span class="ctrl-label">Current I</span><input type="range" min="0.1" max="5" step="0.1" value="1.0" oninput="magSolCurrent=+this.value;document.getElementById('mag-sc-val').textContent=this.value+'A'"><span class="ctrl-val" id="mag-sc-val">1.0A</span></div><div class="ctrl-row"><span class="ctrl-label">Direction</span><div class="seg-btns" style="flex:1"><button class="seg-btn active" id="mag-sfwd" onclick="magSolDir=1;document.getElementById('mag-sfwd').classList.add('active');document.getElementById('mag-srev').classList.remove('active')">→ Fwd</button><button class="seg-btn" id="mag-srev" onclick="magSolDir=-1;document.getElementById('mag-srev').classList.add('active');document.getElementById('mag-sfwd').classList.remove('active')">← Rev</button></div></div>`,
+      equations: `<div class="eq-block"><div class="eq-name">Solenoid Field</div><div class="eq-formula">B = μ₀ · n · I</div><div class="eq-desc">Uniform field inside; weaker dipole-like field outside.</div></div><div class="eq-block"><div class="eq-name">Ampère's Law</div><div class="eq-formula">∮ B·dl = μ₀ I_enc</div></div>`,
+      legend: `<div class="legend-item"><div class="legend-line" style="background:#f59e0b"></div> Wire coils</div><div class="legend-item"><div class="legend-line" style="background:#60a5fa"></div> Internal B field</div><div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div> N pole</div><div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> S pole</div>`
+    }
+  };
+  const cfg = cfgMap[m];
+  document.getElementById('mag-ctrl-title').textContent = cfg.title;
+  document.getElementById('mag-ctrl-body').innerHTML = cfg.html;
+  document.getElementById('mag-eq-panel').innerHTML = cfg.equations;
+  document.getElementById('mag-legend-panel').innerHTML = cfg.legend;
+  magReset();
+}
+
+function magReset() {
+  if (animLoops.mag) { cancelAnimationFrame(animLoops.mag); delete animLoops.mag; }
+  if (magRenderer) { magRenderer.dispose(); }
+  
+  magScene = createBaseScene(0x050709);
+  addLights(magScene);
+  addGridHelper(magScene);
+  
+  const wrap = document.getElementById('mag-3d-wrap');
+  magRenderer = createRenderer('mag-3d-wrap');
+  magCamera = createCamera(wrap.clientWidth, wrap.clientHeight, 9);
+  setupOrbit(magRenderer, magCamera);
+
+  if (magMode === 'field') buildMagFieldScene();
+  else if (magMode === 'charge') buildMagChargeScene();
+  else if (magMode === 'solenoid') buildMagSolenoidScene();
+
+  function loop() {
+    animLoops.mag = requestAnimationFrame(loop);
+    updateMagScene();
+    magRenderer.render(magScene, magCamera);
+  }
+  loop();
+}
+
+function buildMagFieldScene() {
+  // Two dipoles N and S
+  const dipoles = [{x:-2, pole:'N'}, {x:2, pole:'S'}];
+  dipoles.forEach(d => {
+    const geo = new THREE.SphereGeometry(0.35, 24, 24);
+    const mat = new THREE.MeshPhongMaterial({
+      color: d.pole==='N' ? 0xef4444 : 0x3b82f6,
+      emissive: d.pole==='N' ? 0xef4444 : 0x3b82f6,
+      emissiveIntensity: 0.5, shininess: 80
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(d.x, 0, 0);
+    magScene.add(mesh);
+    // Glow ring
+    const ringGeo = new THREE.TorusGeometry(0.5, 0.04, 8, 32);
+    const ringMat = new THREE.MeshBasicMaterial({ color: d.pole==='N' ? 0xff6666 : 0x6699ff, transparent: true, opacity: 0.4 });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.position.set(d.x, 0, 0);
+    magScene.add(ring);
+    // Label sprite using canvas texture
+    const cv = document.createElement('canvas'); cv.width=64; cv.height=64;
+    const cx2 = cv.getContext('2d');
+    cx2.fillStyle = d.pole==='N' ? '#ef4444' : '#3b82f6';
+    cx2.font = 'bold 40px monospace'; cx2.textAlign='center'; cx2.textBaseline='middle';
+    cx2.fillText(d.pole, 32, 32);
+    const tex = new THREE.CanvasTexture(cv);
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({map:tex, transparent:true}));
+    sp.scale.set(0.8,0.8,1); sp.position.set(d.x, 0.7, 0);
+    magScene.add(sp);
+  });
+
+  // Draw 3D field lines using streamline integration
+  const numLines = 16;
+  for (let i = 0; i < numLines; i++) {
+    const angle = (i / numLines) * Math.PI * 2;
+    const startR = 0.5;
+    let px = -2 + startR * Math.cos(angle);
+    let py = startR * Math.sin(angle);
+    let pz = startR * Math.sin(angle * 0.7);
+    const pts = [];
+    for (let step = 0; step < 300; step++) {
+      pts.push(new THREE.Vector3(px, py, pz));
+      let bx=0, by=0, bz=0;
+      [{ x:-2, s:1 }, { x:2, s:-1 }].forEach(d => {
+        const dx=px-d.x, dy=py, dz=pz;
+        const r2=dx*dx+dy*dy+dz*dz;
+        if (r2 < 0.1) return;
+        const r=Math.sqrt(r2), mag=d.s*magFieldStrength*2/(r2);
+        bx+=mag*dx/r; by+=mag*dy/r; bz+=mag*dz/r;
+      });
+      const bmag=Math.sqrt(bx*bx+by*by+bz*bz);
+      if (bmag < 0.01) break;
+      const ds=0.07;
+      px+=ds*bx/bmag; py+=ds*by/bmag; pz+=ds*bz/bmag;
+      if (Math.abs(px)>6||Math.abs(py)>5||Math.abs(pz)>5) break;
+    }
+    if (pts.length > 3) {
+      const t = makeTube(pts, 0.025, 0x4f8eff, 0.6);
+      t.material.color.setHSL(0.6, 0.7, 0.55);
+      magScene.add(t);
+    }
+  }
+}
+
+let magChargeState = { x:0, y:0.5, z:0, vx:0, vy:0, vz:0 };
+let magTrailMeshes = [];
+function buildMagChargeScene() {
+  magChargeState = { x:-2, y:0, z:0, vx:magParticleSpeed*0.05, vy:0.01, vz:0 };
+  magTrailMeshes = [];
+  // B field visual: grid of dots (into screen = -z direction)
+  const dotGeo = new THREE.SphereGeometry(0.04, 6, 6);
+  const dotMat = new THREE.MeshBasicMaterial({ color: 0x7c5cfc, transparent: true, opacity: 0.4 });
+  for (let x=-4;x<=4;x+=1) for (let y=-3;y<=3;y+=1) {
+    const d = new THREE.Mesh(dotGeo, dotMat);
+    d.position.set(x, y, 0);
+    magScene.add(d);
+  }
+  // Label
+  const lbl = document.createElement('canvas'); lbl.width=256; lbl.height=64;
+  const lctx = lbl.getContext('2d');
+  lctx.fillStyle = 'rgba(167,139,250,0.8)'; lctx.font='20px Space Mono,monospace';
+  lctx.fillText('B field ⊗ into page', 10, 40);
+  const ltex = new THREE.CanvasTexture(lbl);
+  const lsp = new THREE.Sprite(new THREE.SpriteMaterial({map:ltex, transparent:true}));
+  lsp.scale.set(3,0.75,1); lsp.position.set(2.5, 2.5, 0);
+  magScene.add(lsp);
+  lsp.userData.isLabel = true;
+}
+
+let magParticleGroup = null;
+function updateMagScene() {
+  const t = Date.now() * 0.001;
+  if (magMode === 'field') {
+    // Gentle rotation animation on rings
+    magScene.children.forEach(c => { if (c.type === 'Mesh' && c.geometry && c.geometry.type === 'TorusGeometry') { c.rotation.y = t * 0.5; } });
+  } else if (magMode === 'charge') {
+    // Update charge physics
+    const Bz = magFieldStrength;
+    const q = magParticleCharge;
+    const ax = q * magChargeState.vy * Bz;
+    const ay = -q * magChargeState.vx * Bz;
+    magChargeState.vx += ax * 0.016;
+    magChargeState.vy += ay * 0.016;
+    const spd = Math.sqrt(magChargeState.vx**2+magChargeState.vy**2);
+    magChargeState.vx = magChargeState.vx/spd * magParticleSpeed * 0.05;
+    magChargeState.vy = magChargeState.vy/spd * magParticleSpeed * 0.05;
+    magChargeState.x += magChargeState.vx;
+    magChargeState.y += magChargeState.vy;
+    if (magChargeState.x > 5) magChargeState.x -= 10;
+    if (magChargeState.x < -5) magChargeState.x += 10;
+    if (magChargeState.y > 4) magChargeState.y -= 8;
+    if (magChargeState.y < -4) magChargeState.y += 8;
+    
+    // Remove old particle group and rebuild
+    if (magParticleGroup) magScene.remove(magParticleGroup);
+    magParticleGroup = new THREE.Group();
+    
+    // Trail
+    magTrailMeshes.push(new THREE.Vector3(magChargeState.x, magChargeState.y, 0));
+    if (magTrailMeshes.length > 120) magTrailMeshes.shift();
+    if (magTrailMeshes.length > 2) {
+      const trailGeo = new THREE.BufferGeometry().setFromPoints(magTrailMeshes);
+      const trailMat = new THREE.LineBasicMaterial({ color: 0x7c5cfc, transparent: true, opacity: 0.35 });
+      magParticleGroup.add(new THREE.Line(trailGeo, trailMat));
+    }
+    
+    // Particle
+    const pg = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16),
+      new THREE.MeshPhongMaterial({ color: q > 0 ? 0xfbbf24 : 0xa78bfa, emissive: q > 0 ? 0xfbbf24 : 0xa78bfa, emissiveIntensity: 0.5 }));
+    pg.position.set(magChargeState.x, magChargeState.y, 0);
+    magParticleGroup.add(pg);
+    
+    // Velocity arrow
+    const vDir = new THREE.Vector3(magChargeState.vx, magChargeState.vy, 0).normalize();
+    magParticleGroup.add(makeArrow(vDir, new THREE.Vector3(magChargeState.x, magChargeState.y, 0), 1.2, 0x4ade80));
+    
+    // Force arrow
+    const fDir = new THREE.Vector3(magChargeState.vy, -magChargeState.vx, 0).normalize().multiplyScalar(q);
+    if (fDir.length() > 0.01) magParticleGroup.add(makeArrow(fDir.normalize(), new THREE.Vector3(magChargeState.x, magChargeState.y, 0), 1.0, 0xf87171));
+    
+    magScene.add(magParticleGroup);
+    
+    const radius_m = (1.67e-27 * magParticleSpeed*1e6) / (1.6e-19 * magFieldStrength);
+    document.getElementById('mag-ro-field').textContent = magFieldStrength.toFixed(2);
+    document.getElementById('mag-ro-force').textContent = (1.6e-19 * magParticleSpeed*1e6 * magFieldStrength).toExponential(2);
+    document.getElementById('mag-ro-vel').textContent = magParticleSpeed.toFixed(1);
+    document.getElementById('mag-ro-radius').textContent = radius_m.toFixed(3);
+  } else if (magMode === 'solenoid') {
+    // Animate field lines
+    magScene.children.forEach(c => {
+      if (c.userData.isSolLine) c.material.opacity = 0.4 + 0.2 * Math.sin(t * 2 + c.userData.phase);
+    });
+    const Bval = (4*Math.PI*1e-7 * magSolCurrent * magSolTurns / 3.2).toFixed(5);
+    document.getElementById('mag-ro-field').textContent = parseFloat(Bval).toExponential(2);
+  }
+}
+
+function buildMagSolenoidScene() {
+  const solLen = 4, solR = 1;
+  const turns = magSolTurns;
+  
+  // Coil wire using torus path
+  for (let i = 0; i <= turns; i++) {
+    const x = -solLen/2 + i * solLen/turns;
+    const geo = new THREE.TorusGeometry(solR, 0.05, 8, 32);
+    const mat = new THREE.MeshPhongMaterial({ color: 0xfbbf24, emissive: 0xfbbf24, emissiveIntensity: 0.3 });
+    const coil = new THREE.Mesh(geo, mat);
+    coil.position.set(x, 0, 0);
+    coil.rotation.y = Math.PI / 2;
+    magScene.add(coil);
+  }
+  
+  // Internal field lines (along axis)
+  const numIntLines = 7;
+  for (let i = 0; i < numIntLines; i++) {
+    const angle = (i / numIntLines) * Math.PI * 2;
+    const r = 0.6;
+    const py = r * Math.sin(angle), pz = r * Math.cos(angle);
+    const pts = [new THREE.Vector3(-solLen/2, py, pz), new THREE.Vector3(solLen/2, py, pz)];
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const dir = magSolDir > 0 ? 1 : -1;
+    const mat = new THREE.LineBasicMaterial({ color: 0x60a5fa, transparent: true, opacity: 0.55 });
+    const line = new THREE.Line(geo, mat);
+    line.userData.isSolLine = true;
+    line.userData.phase = i * 0.5;
+    magScene.add(line);
+    // Arrow midpoint
+    const arrowDir = new THREE.Vector3(dir, 0, 0);
+    const arrowOrigin = new THREE.Vector3(0, py, pz);
+    magScene.add(makeArrow(arrowDir, arrowOrigin, 0.5, 0x60a5fa, 0.1));
+  }
+  
+  // Pole labels
+  ['N','S'].forEach((label, idx) => {
+    const x = idx === 0 ? solLen/2 + 0.3 : -solLen/2 - 0.3;
+    const eff = magSolDir > 0 ? idx === 0 : idx === 1;
+    const cv = document.createElement('canvas'); cv.width=64; cv.height=64;
+    const cx3 = cv.getContext('2d');
+    cx3.fillStyle = eff ? '#ef4444' : '#3b82f6';
+    cx3.font = 'bold 44px monospace'; cx3.textAlign='center'; cx3.textBaseline='middle';
+    cx3.fillText(eff ? 'N' : 'S', 32, 32);
+    const tex = new THREE.CanvasTexture(cv);
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({map:tex, transparent:true}));
+    sp.scale.set(0.7,0.7,1); sp.position.set(x, 0, 0);
+    magScene.add(sp);
+  });
+}
+
+function initMag3D() {
+  magSwitchMode('field');
+}
+
+// ============================================================
+// HALL EFFECT 3D
+// ============================================================
+let hallScene, hallRenderer, hallCamera;
+let hallB = 1.0, hallI = 2.0, hallType = 'n';
+let hallParticles = [];
+
+function hallSetB(v) { hallB = v; document.getElementById('hall-ro-b').textContent = v.toFixed(2); updateHallReadouts(); }
+function hallSetI(v) { hallI = v; document.getElementById('hall-ro-i').textContent = v.toFixed(2); updateHallReadouts(); }
+function hallSetType(t) {
+  hallType = t;
+  document.getElementById('hall-n').classList.toggle('active', t==='n');
+  document.getElementById('hall-p').classList.toggle('active', t==='p');
+  updateHallReadouts();
+}
+
+function updateHallReadouts() {
+  const vh = (hallI * hallB / (1e19 * 1.6e-19 * 0.005)).toFixed(4);
+  document.getElementById('hall-ro-vh').textContent = parseFloat(vh).toFixed(4);
+  document.getElementById('hall-ro-d').textContent = hallB > 2 ? 'high' : hallB > 1 ? 'med' : 'low';
+}
+
+function hallReset() {
+  if (animLoops.hall) { cancelAnimationFrame(animLoops.hall); delete animLoops.hall; }
+  if (hallRenderer) hallRenderer.dispose();
+  
+  hallScene = createBaseScene(0x050709);
+  addLights(hallScene);
+  addGridHelper(hallScene);
+  
+  const wrap = document.getElementById('hall-3d-wrap');
+  hallRenderer = createRenderer('hall-3d-wrap');
+  hallCamera = createCamera(wrap.clientWidth, wrap.clientHeight, 9);
+  setupOrbit(hallRenderer, hallCamera);
+  
+  buildHallScene();
+  updateHallReadouts();
+  
+  function loop() {
+    animLoops.hall = requestAnimationFrame(loop);
+    updateHallScene();
+    hallRenderer.render(hallScene, hallCamera);
+  }
+  loop();
+}
+
+let hallParticleGroup = null;
+function buildHallScene() {
+  // Conductor slab
+  const slabGeo = new THREE.BoxGeometry(5, 0.8, 2);
+  const slabMat = new THREE.MeshPhongMaterial({ color: 0x1e3a6e, transparent: true, opacity: 0.6, side: THREE.DoubleSide });
+  const slab = new THREE.Mesh(slabGeo, slabMat);
+  hallScene.add(slab);
+  
+  // Slab edges
+  const edgesGeo = new THREE.EdgesGeometry(slabGeo);
+  const edgesMat = new THREE.LineBasicMaterial({ color: 0x4f8eff, transparent: true, opacity: 0.8 });
+  const edges = new THREE.LineSegments(edgesGeo, edgesMat);
+  hallScene.add(edges);
+  
+  // B field arrows (along +z)
+  for (let x = -2; x <= 2; x += 1) {
+    const arr = makeArrow(new THREE.Vector3(0, 0, 1), new THREE.Vector3(x, 0, -2.5), 1.5, 0x00d4aa, 0.2);
+    hallScene.add(arr);
+  }
+  // B label
+  addTextSprite(hallScene, 'B →(+z)', new THREE.Vector3(-3, 1.5, 0), '#00d4aa', 20);
+  
+  // Current arrow (along +x)
+  magScene; // just accessing to avoid lint
+  const cArr = makeArrow(new THREE.Vector3(1, 0, 0), new THREE.Vector3(-3.5, 0, 0), 2, 0xfbbf24, 0.25);
+  hallScene.add(cArr);
+  addTextSprite(hallScene, 'I (+x)', new THREE.Vector3(-4, 0.8, 0), '#fbbf24', 18);
+  
+  // Hall side indicators
+  const plusGeo = new THREE.PlaneGeometry(1, 0.7);
+  const plusMat = new THREE.MeshBasicMaterial({ color: 0xf87171, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
+  const plusPlane = new THREE.Mesh(plusGeo, plusMat);
+  plusPlane.position.set(0, 0.4, 1.05);
+  hallScene.add(plusPlane);
+  addTextSprite(hallScene, 'V_H +', new THREE.Vector3(1.5, 1.2, 1.2), '#f87171', 16);
+  
+  const minusGeo = new THREE.PlaneGeometry(1, 0.7);
+  const minusMat = new THREE.MeshBasicMaterial({ color: 0x34d399, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
+  const minusPlane = new THREE.Mesh(minusGeo, minusMat);
+  minusPlane.position.set(0, 0.4, -1.05);
+  hallScene.add(minusPlane);
+  addTextSprite(hallScene, 'V_H −', new THREE.Vector3(1.5, 1.2, -1.2), '#34d399', 16);
+  
+  // Init particles
+  hallParticles = [];
+  for (let i = 0; i < 15; i++) {
+    hallParticles.push({
+      x: -2 + Math.random()*4,
+      y: (Math.random()-0.5) * 0.5,
+      z: (Math.random()-0.5) * 1.5,
+      vy: 0, phase: Math.random()*Math.PI*2
+    });
+  }
+}
+
+function addTextSprite(scene, text, pos, color='#ffffff', size=18) {
+  const cv = document.createElement('canvas'); cv.width = 256; cv.height = 64;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = color;
+  ctx.font = `bold ${size}px Space Mono, monospace`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, 128, 32);
+  const tex = new THREE.CanvasTexture(cv);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({map:tex, transparent:true}));
+  sp.scale.set(2.5, 0.65, 1);
+  sp.position.copy(pos);
+  scene.add(sp);
+  return sp;
+}
+
+function updateHallScene() {
+  const t = Date.now() * 0.001;
+  // Animate particles drifting in +x, deflected in ±y by Hall force
+  const deflection = hallB * hallI * 0.3 * (hallType === 'n' ? -1 : 1);
+  
+  if (hallParticleGroup) hallScene.remove(hallParticleGroup);
+  hallParticleGroup = new THREE.Group();
+  
+  hallParticles.forEach((p, i) => {
+    p.x += 0.03;
+    if (p.x > 2.5) p.x = -2.5;
+    // Drift z toward Hall accumulation
+    const targetZ = deflection * 0.8;
+    p.z += (targetZ - p.z) * 0.05;
+    
+    const pGeo = new THREE.SphereGeometry(0.08, 8, 8);
+    const col = hallType === 'n' ? 0xa78bfa : 0xfbbf24;
+    const pMat = new THREE.MeshPhongMaterial({ color: col, emissive: col, emissiveIntensity: 0.5 });
+    const mesh = new THREE.Mesh(pGeo, pMat);
+    mesh.position.set(p.x, p.y + 0.1, p.z);
+    hallParticleGroup.add(mesh);
+    
+    // Velocity arrow (small, +x)
+    hallParticleGroup.add(makeArrow(new THREE.Vector3(1,0,0), new THREE.Vector3(p.x, p.y+0.1, p.z), 0.4, 0xfbbf24, 0.08));
+    
+    // Force arrow
+    if (Math.abs(deflection) > 0.01) {
+      const fDir = new THREE.Vector3(0, 0, deflection > 0 ? 1 : -1);
+      hallParticleGroup.add(makeArrow(fDir, new THREE.Vector3(p.x, p.y+0.1, p.z), 0.35, 0xf87171, 0.07));
+    }
+  });
+  
+  hallScene.add(hallParticleGroup);
+}
+
+function initHall3D() { hallReset(); }
+
+// ============================================================
+// F = BQV sin θ  — Applications
+// ============================================================
+let fbqvScene, fbqvRenderer, fbqvCamera;
+let fbqvB = 1.0, fbqvV = 2.0, fbqvAngle = 90;
+let fbqvSubMode = 'crt';
+let fbqvParticleState = {x:0,y:0,z:0,vx:0,vy:0,vz:0};
+let fbqvTrail = [];
+let fbqvParticleGroup2 = null;
+
+function fbqvSetB(v) { fbqvB = v; updateFBQVReadouts(); }
+function fbqvSetV(v) { fbqvV = v; fbqvResetParticle(); updateFBQVReadouts(); }
+function fbqvSetAngle(v) { fbqvAngle = v; fbqvResetParticle(); updateFBQVReadouts(); }
+
+function updateFBQVReadouts() {
+  const sinA = Math.sin(fbqvAngle * Math.PI/180);
+  const F = fbqvB * 1.6e-19 * fbqvV*1e6 * sinA;
+  document.getElementById('fbqv-ro-f').textContent = (F*1e13).toFixed(2);
+  document.getElementById('fbqv-ro-sin').textContent = sinA.toFixed(3);
+  const r = (9.11e-31 * fbqvV*1e6) / (1.6e-19 * fbqvB);
+  document.getElementById('fbqv-ro-r').textContent = r.toFixed(4);
+  document.getElementById('fbqv-ro-mode').textContent = fbqvSubMode.toUpperCase();
+}
+
+function fbqvSwitch(m) {
+  fbqvSubMode = m;
+  document.querySelectorAll('#sim-fbqv .sim-tab').forEach((t,i) => {
+    t.classList.toggle('active', ['crt','cyclotron','railgun'][i] === m);
+  });
+  const labels = {crt:'CRT Beam Deflection', cyclotron:'Cyclotron — Circular Motion', railgun:'Rail Gun Acceleration'};
+  document.getElementById('fbqv-label').textContent = labels[m];
+  fbqvReset();
+}
+
+function fbqvResetParticle() {
+  if (fbqvSubMode === 'crt') fbqvParticleState = {x:-3.5, y:0, z:0, vx:fbqvV*0.04, vy:0, vz:0};
+  else if (fbqvSubMode === 'cyclotron') fbqvParticleState = {x:0, y:0.1, z:0, vx:fbqvV*0.04, vy:0, vz:0};
+  else fbqvParticleState = {x:-3.5, y:0, z:0, vx:fbqvV*0.04, vy:0, vz:0};
+  fbqvTrail = [];
+}
+
+function fbqvReset() {
+  if (animLoops.fbqv) { cancelAnimationFrame(animLoops.fbqv); delete animLoops.fbqv; }
+  if (fbqvRenderer) fbqvRenderer.dispose();
+  
+  fbqvScene = createBaseScene(0x050709);
+  addLights(fbqvScene);
+  addGridHelper(fbqvScene);
+  
+  const wrap = document.getElementById('fbqv-3d-wrap');
+  fbqvRenderer = createRenderer('fbqv-3d-wrap');
+  fbqvCamera = createCamera(wrap.clientWidth, wrap.clientHeight, 9);
+  setupOrbit(fbqvRenderer, fbqvCamera);
+  
+  fbqvResetParticle();
+  
+  if (fbqvSubMode === 'crt') buildCRTScene();
+  else if (fbqvSubMode === 'cyclotron') buildCyclotronScene();
+  else buildRailgunScene();
+  
+  updateFBQVReadouts();
+  
+  function loop() {
+    animLoops.fbqv = requestAnimationFrame(loop);
+    updateFBQVScene();
+    fbqvRenderer.render(fbqvScene, fbqvCamera);
+  }
+  loop();
+}
+
+function buildCRTScene() {
+  // CRT tube body
+  const tubeGeo = new THREE.CylinderGeometry(0.8, 1.2, 7, 16, 1, true);
+  const tubeMat = new THREE.MeshPhongMaterial({ color: 0x1a2845, transparent: true, opacity: 0.25, side: THREE.DoubleSide });
+  const tube = new THREE.Mesh(tubeGeo, tubeMat);
+  tube.rotation.z = Math.PI/2;
+  fbqvScene.add(tube);
+  
+  // Screen
+  const screenGeo = new THREE.CircleGeometry(1.2, 32);
+  const screenMat = new THREE.MeshPhongMaterial({ color: 0x0a1f1a, transparent: true, opacity: 0.8, side: THREE.DoubleSide });
+  const screen = new THREE.Mesh(screenGeo, screenMat);
+  screen.position.set(3.5, 0, 0);
+  screen.rotation.y = Math.PI/2;
+  fbqvScene.add(screen);
+  // Screen grid
+  const sgrid = new THREE.GridHelper(2.4, 6, 0x1a4a3a, 0x112a22);
+  sgrid.position.set(3.5, 0, 0);
+  sgrid.rotation.z = Math.PI/2;
+  fbqvScene.add(sgrid);
+  
+  // Electron gun
+  const gunGeo = new THREE.CylinderGeometry(0.15, 0.25, 1, 8);
+  const gunMat = new THREE.MeshPhongMaterial({ color: 0x444466 });
+  const gun = new THREE.Mesh(gunGeo, gunMat);
+  gun.position.set(-3.8, 0, 0);
+  gun.rotation.z = Math.PI/2;
+  fbqvScene.add(gun);
+  
+  // Deflection plates
+  [-0.4, 0.4].forEach(y => {
+    const platGeo = new THREE.BoxGeometry(2, 0.04, 1.5);
+    const platMat = new THREE.MeshPhongMaterial({ color: 0x334466, transparent: true, opacity: 0.7 });
+    const plat = new THREE.Mesh(platGeo, platMat);
+    plat.position.set(0, y, 0);
+    fbqvScene.add(plat);
+  });
+  
+  // B field region indicator
+  const bRegionGeo = new THREE.BoxGeometry(2, 2, 1.5);
+  const bRegionMat = new THREE.MeshBasicMaterial({ color: 0x7c5cfc, transparent: true, opacity: 0.06, side: THREE.DoubleSide });
+  fbqvScene.add(new THREE.Mesh(bRegionGeo, bRegionMat));
+  addTextSprite(fbqvScene, 'B field region', new THREE.Vector3(0, 1.5, 0), '#a78bfa', 16);
+  addTextSprite(fbqvScene, '⊗ B into page', new THREE.Vector3(0, -1.5, 0), '#a78bfa', 14);
+}
+
+function buildCyclotronScene() {
+  // Two D-shaped dees
+  ['left','right'].forEach((side, idx) => {
+    const pts = [];
+    const r = 2.5;
+    const startA = idx === 0 ? Math.PI/2 : -Math.PI/2;
+    const endA = idx === 0 ? Math.PI*3/2 : Math.PI/2;
+    for (let a = startA; a <= endA; a += 0.1) {
+      pts.push(new THREE.Vector2(r * Math.cos(a), r * Math.sin(a)));
+    }
+    pts.push(new THREE.Vector2(0, r * Math.sin(endA)));
+    pts.push(new THREE.Vector2(0, r * Math.sin(startA)));
+    const shape = new THREE.Shape(pts);
+    const geo = new THREE.ShapeGeometry(shape);
+    const col = idx === 0 ? 0x1a3a6e : 0x1a4a3e;
+    const mat = new THREE.MeshPhongMaterial({ color: col, transparent: true, opacity: 0.4, side: THREE.DoubleSide });
+    const mesh = new THREE.Mesh(geo, mat);
+    fbqvScene.add(mesh);
+    const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(2.5, 5, 0.05));
+    const edgeMat = new THREE.LineBasicMaterial({ color: idx===0?0x4f8eff:0x34d399, transparent: true, opacity: 0.5 });
+    const line = new THREE.LineSegments(edges, edgeMat);
+    line.position.set(idx===0?-1.25:1.25, 0, 0);
+    fbqvScene.add(line);
+  });
+  
+  // B field symbols
+  for (let x=-2;x<=2;x+=1.5) for (let y=-2;y<=2;y+=1.5) {
+    const dot = new THREE.Mesh(new THREE.SphereGeometry(0.05, 6, 6), new THREE.MeshBasicMaterial({color:0x7c5cfc}));
+    dot.position.set(x, y, 0.1);
+    fbqvScene.add(dot);
+  }
+  addTextSprite(fbqvScene, 'Cyclotron D-dees', new THREE.Vector3(0, 3.2, 0), '#4f8eff', 18);
+  addTextSprite(fbqvScene, 'B ⊙ out of page', new THREE.Vector3(0, -3.2, 0), '#a78bfa', 16);
+}
+
+function buildRailgunScene() {
+  // Two rails
+  [-0.5, 0.5].forEach(z => {
+    const railGeo = new THREE.CylinderGeometry(0.05, 0.05, 8, 8);
+    const railMat = new THREE.MeshPhongMaterial({ color: 0xfbbf24, emissive: 0xfbbf24, emissiveIntensity: 0.2 });
+    const rail = new THREE.Mesh(railGeo, railMat);
+    rail.rotation.z = Math.PI/2;
+    rail.position.set(0, 0, z);
+    fbqvScene.add(rail);
+  });
+  
+  // Armature (projectile bar)
+  const armGeo = new THREE.BoxGeometry(0.2, 0.15, 1);
+  const armMat = new THREE.MeshPhongMaterial({ color: 0xef4444, emissive: 0xef4444, emissiveIntensity: 0.3 });
+  const arm = new THREE.Mesh(armGeo, armMat);
+  arm.position.set(-3, 0, 0);
+  arm.userData.isArmature = true;
+  fbqvScene.add(arm);
+  
+  // B field arrows (upward)
+  for (let x=-3;x<=3;x+=1.5) {
+    const arr = makeArrow(new THREE.Vector3(0, 1, 0), new THREE.Vector3(x, -1, 0), 1.2, 0xa78bfa, 0.18);
+    fbqvScene.add(arr);
+  }
+  addTextSprite(fbqvScene, 'Rail Gun — F = BIL', new THREE.Vector3(0, 2.5, 0), '#f87171', 20);
+  addTextSprite(fbqvScene, 'B field ↑  |  I flows across', new THREE.Vector3(0, -2, 0), '#a78bfa', 14);
+}
+
+function updateFBQVScene() {
+  const sinA = Math.sin(fbqvAngle * Math.PI / 180);
+  const Beff = fbqvB * sinA;
+  
+  // Physics update
+  if (fbqvSubMode === 'crt') {
+    // Only deflect in B region (x between -1 and 1)
+    const inB = fbqvParticleState.x > -1 && fbqvParticleState.x < 1;
+    if (inB) {
+      fbqvParticleState.vy += Beff * fbqvParticleState.vx * 0.04 * (-1); // deflect up
+    }
+    fbqvParticleState.x += fbqvParticleState.vx;
+    fbqvParticleState.y += fbqvParticleState.vy;
+    if (fbqvParticleState.x > 4.5 || Math.abs(fbqvParticleState.y) > 2) fbqvResetParticle();
+  } else if (fbqvSubMode === 'cyclotron') {
+    const ax = fbqvParticleState.vy * Beff;
+    const ay = -fbqvParticleState.vx * Beff;
+    fbqvParticleState.vx += ax * 0.016;
+    fbqvParticleState.vy += ay * 0.016;
+    const spd = Math.sqrt(fbqvParticleState.vx**2+fbqvParticleState.vy**2);
+    fbqvParticleState.vx = fbqvParticleState.vx/spd * fbqvV*0.04;
+    fbqvParticleState.vy = fbqvParticleState.vy/spd * fbqvV*0.04;
+    fbqvParticleState.x += fbqvParticleState.vx;
+    fbqvParticleState.y += fbqvParticleState.vy;
+    if (Math.sqrt(fbqvParticleState.x**2+fbqvParticleState.y**2) > 2.4) fbqvResetParticle();
+  } else {
+    // Railgun: accelerate along +x
+    fbqvParticleState.vx += Beff * 0.002;
+    fbqvParticleState.x += fbqvParticleState.vx;
+    if (fbqvParticleState.x > 4) fbqvResetParticle();
+    // Move armature mesh
+    fbqvScene.children.forEach(c => {
+      if (c.userData.isArmature) c.position.x = fbqvParticleState.x;
+    });
+  }
+  
+  fbqvTrail.push(new THREE.Vector3(fbqvParticleState.x, fbqvParticleState.y, fbqvParticleState.z));
+  if (fbqvTrail.length > 200) fbqvTrail.shift();
+  
+  if (fbqvParticleGroup2) fbqvScene.remove(fbqvParticleGroup2);
+  fbqvParticleGroup2 = new THREE.Group();
+  
+  // Trail
+  if (fbqvTrail.length > 2) {
+    const trailGeo = new THREE.BufferGeometry().setFromPoints(fbqvTrail);
+    fbqvParticleGroup2.add(new THREE.Line(trailGeo, new THREE.LineBasicMaterial({color:0x7c5cfc, transparent:true, opacity:0.5})));
+  }
+  
+  // Particle
+  const pm = new THREE.Mesh(new THREE.SphereGeometry(0.18,12,12),
+    new THREE.MeshPhongMaterial({color:0xfbbf24, emissive:0xfbbf24, emissiveIntensity:0.6}));
+  pm.position.set(fbqvParticleState.x, fbqvParticleState.y, 0);
+  fbqvParticleGroup2.add(pm);
+  
+  // Velocity arrow
+  const v = new THREE.Vector3(fbqvParticleState.vx, fbqvParticleState.vy, 0);
+  if (v.length() > 0.001) fbqvParticleGroup2.add(makeArrow(v.clone().normalize(), new THREE.Vector3(fbqvParticleState.x, fbqvParticleState.y, 0), 0.9, 0x4ade80, 0.15));
+  
+  // Force arrow
+  const fDir = new THREE.Vector3(fbqvParticleState.vy, -fbqvParticleState.vx, 0).normalize();
+  if (fDir.length() > 0.01 && Beff > 0.01) fbqvParticleGroup2.add(makeArrow(fDir, new THREE.Vector3(fbqvParticleState.x, fbqvParticleState.y, 0), 0.8, 0xf87171, 0.14));
+  
+  fbqvScene.add(fbqvParticleGroup2);
+}
+
+function initFBQV3D(m) { fbqvSubMode = m || 'crt'; fbqvReset(); }
+
+// ============================================================
+// CURRENT-CURRENT INTERACTION 3D
+// ============================================================
+let cciScene, cciRenderer, cciCamera;
+let cciI1 = 5, cciI2 = 5, cciDir = 'same', cciSep = 3;
+let cciGroup = null;
+
+function cciSetI1(v) { cciI1 = v; updateCCIReadouts(); rebuildCCIWires(); }
+function cciSetI2(v) { cciI2 = v; updateCCIReadouts(); rebuildCCIWires(); }
+function cciSetDir(d) {
+  cciDir = d;
+  document.getElementById('cci-same').classList.toggle('active', d==='same');
+  document.getElementById('cci-opp').classList.toggle('active', d==='opp');
+  updateCCIReadouts(); rebuildCCIWires();
+}
+function cciSetSep(v) { cciSep = v; document.getElementById('cci-ro-sep').textContent = v.toFixed(1); updateCCIReadouts(); rebuildCCIWires(); }
+
+function updateCCIReadouts() {
+  const mu0 = 4*Math.PI*1e-7;
+  const F_per_L = mu0 * cciI1 * cciI2 / (2*Math.PI * cciSep/100);
+  document.getElementById('cci-ro-f').textContent = (F_per_L*1e6).toFixed(2);
+  document.getElementById('cci-ro-type').textContent = cciDir === 'same' ? 'ATTRACT' : 'REPEL';
+  const B_at_2 = mu0 * cciI1 / (2*Math.PI * cciSep/100);
+  document.getElementById('cci-ro-b').textContent = (B_at_2*1e5).toFixed(2);
+}
+
+function rebuildCCIWires() {
+  if (!cciScene) return;
+  if (cciGroup) cciScene.remove(cciGroup);
+  buildCCIGroup();
+}
+
+function buildCCIGroup() {
+  cciGroup = new THREE.Group();
+  const sep = cciSep * 0.15; // visual scale
+  const wireLen = 5;
+  const i2dir = cciDir === 'same' ? 1 : -1;
+  
+  [[-sep/2, cciI1, 1, 0xfbbf24], [sep/2, cciI2, i2dir, 0x4f8eff]].forEach(([x, cur, dir, col]) => {
+    // Wire
+    const wGeo = new THREE.CylinderGeometry(0.06, 0.06, wireLen, 12);
+    const wMat = new THREE.MeshPhongMaterial({ color: col, emissive: col, emissiveIntensity: 0.3 });
+    const wire = new THREE.Mesh(wGeo, wMat);
+    wire.position.set(x, 0, 0);
+    cciGroup.add(wire);
+    
+    // Current arrows
+    const numArrows = 5;
+    for (let i = 0; i < numArrows; i++) {
+      const y = -wireLen/2 + (i+0.5) * wireLen/numArrows;
+      const aDir = new THREE.Vector3(0, dir, 0);
+      cciGroup.add(makeArrow(aDir, new THREE.Vector3(x, y, 0), 0.6, col, 0.12));
+    }
+    
+    // Circular B field rings
+    const numRings = 4;
+    for (let r = 0; r < numRings; r++) {
+      const radius = 0.3 + r * 0.25;
+      const alpha = 0.5 - r*0.1;
+      const ringGeo = new THREE.TorusGeometry(radius, 0.015, 6, 48);
+      const ringMat = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: alpha });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.position.set(x, 0, 0);
+      ring.rotation.x = Math.PI/2;
+      ring.userData.isRing = true;
+      ring.userData.ringDir = dir;
+      cciGroup.add(ring);
+    }
+  });
+  
+  // Force arrows between wires
+  const mu0 = 4*Math.PI*1e-7;
+  const F = mu0 * cciI1 * cciI2 / (2*Math.PI * cciSep/100);
+  const forceColor = cciDir === 'same' ? 0x34d399 : 0xf87171;
+  const forceDir1 = new THREE.Vector3(cciDir === 'same' ? 1 : -1, 0, 0).normalize();
+  const forceDir2 = new THREE.Vector3(cciDir === 'same' ? -1 : 1, 0, 0).normalize();
+  
+  [-1.5, 0, 1.5].forEach(y => {
+    const fScale = Math.min(0.8, F * 1e5 + 0.2);
+    cciGroup.add(makeArrow(forceDir1, new THREE.Vector3(-sep/2, y, 0), fScale, forceColor, 0.14));
+    cciGroup.add(makeArrow(forceDir2, new THREE.Vector3(sep/2, y, 0), fScale, forceColor, 0.14));
+  });
+  
+  addTextSprite(cciGroup, `I₁ = ${cciI1}A`, new THREE.Vector3(-sep/2, 3, 0), '#fbbf24', 16);
+  addTextSprite(cciGroup, `I₂ = ${cciI2}A ${cciDir==='opp'?'↓':'↑'}`, new THREE.Vector3(sep/2, 3, 0), '#4f8eff', 16);
+  addTextSprite(cciGroup, cciDir==='same'?'← ATTRACT →':'→ REPEL ←', new THREE.Vector3(0, -3.2, 0), forceColor===0x34d399?'#34d399':'#f87171', 18);
+  
+  cciScene.add(cciGroup);
+}
+
+function cciReset() {
+  if (animLoops.cci) { cancelAnimationFrame(animLoops.cci); delete animLoops.cci; }
+  if (cciRenderer) cciRenderer.dispose();
+  
+  cciScene = createBaseScene(0x050709);
+  addLights(cciScene);
+  addGridHelper(cciScene);
+  
+  const wrap = document.getElementById('cci-3d-wrap');
+  cciRenderer = createRenderer('cci-3d-wrap');
+  cciCamera = createCamera(wrap.clientWidth, wrap.clientHeight, 9);
+  setupOrbit(cciRenderer, cciCamera);
+  
+  buildCCIGroup();
+  updateCCIReadouts();
+  
+  function loop() {
+    animLoops.cci = requestAnimationFrame(loop);
+    updateCCIScene();
+    cciRenderer.render(cciScene, cciCamera);
+  }
+  loop();
+}
+
+function updateCCIScene() {
+  const t = Date.now() * 0.001;
+  if (!cciGroup) return;
+  // Animate B field rings
+  cciGroup.children.forEach(c => {
+    if (c.userData.isRing) {
+      c.material.opacity = 0.2 + 0.3 * Math.abs(Math.sin(t * 1.5 + c.position.x * 5));
+    }
+  });
+}
+
+function initCCI3D() { cciReset(); }
+
+// ============================================================
+// MOVING COIL GALVANOMETER 3D
+// ============================================================
+let galvScene, galvRenderer, galvCamera;
+let galvI = 4, galvB = 0.8, galvK = 2.0, galvN = 50;
+let galvDeflection = 0, galvTargetDeflection = 0;
+let galvCoilGroup = null;
+
+function galvSetI(v) { galvI = v; document.getElementById('galv-ro-i').textContent = Math.abs(v).toFixed(1); updateGalvReadouts(); }
+function galvSetB(v) { galvB = v; updateGalvReadouts(); }
+function galvSetK(v) { galvK = v; updateGalvReadouts(); }
+function galvSetN(v) { galvN = v; updateGalvReadouts(); }
+
+function updateGalvReadouts() {
+  const A = 0.01; // coil area 1cm x 1cm
+  const torque = galvN * galvB * Math.abs(galvI*0.001) * A;
+  galvTargetDeflection = (galvN * galvB * galvI*0.001 * A / galvK) * (180/Math.PI) * 50;
+  galvTargetDeflection = Math.max(-85, Math.min(85, galvTargetDeflection));
+  document.getElementById('galv-ro-def').textContent = Math.abs(galvTargetDeflection).toFixed(1);
+  document.getElementById('galv-ro-tor').textContent = (torque*1e6).toFixed(2);
+  document.getElementById('galv-ro-s').textContent = (galvN * galvB * A / galvK * (180/Math.PI) * 50).toFixed(1);
+}
+
+function galvReset() {
+  if (animLoops.galv) { cancelAnimationFrame(animLoops.galv); delete animLoops.galv; }
+  if (galvRenderer) galvRenderer.dispose();
+  
+  galvScene = createBaseScene(0x050709);
+  addLights(galvScene);
+  addGridHelper(galvScene);
+  
+  const wrap = document.getElementById('galv-3d-wrap');
+  galvRenderer = createRenderer('galv-3d-wrap');
+  galvCamera = createCamera(wrap.clientWidth, wrap.clientHeight, 10);
+  setupOrbit(galvRenderer, galvCamera);
+  
+  buildGalvScene();
+  updateGalvReadouts();
+  
+  function loop() {
+    animLoops.galv = requestAnimationFrame(loop);
+    updateGalvScene();
+    galvRenderer.render(galvScene, galvCamera);
+  }
+  loop();
+}
+
+function buildGalvScene() {
+  // Magnet poles (C-shaped magnet)
+  [-1.8, 1.8].forEach((z, idx) => {
+    const poleGeo = new THREE.BoxGeometry(1.5, 2.5, 0.6);
+    const poleMat = new THREE.MeshPhongMaterial({
+      color: idx===0 ? 0xc0302a : 0x2a5099,
+      emissive: idx===0 ? 0x8b0000 : 0x001a66,
+      emissiveIntensity: 0.4, shininess: 60
+    });
+    const pole = new THREE.Mesh(poleGeo, poleMat);
+    pole.position.set(0, 0, z);
+    galvScene.add(pole);
+    
+    const cv = document.createElement('canvas'); cv.width=64; cv.height=64;
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle = idx===0 ? '#ef4444' : '#3b82f6';
+    ctx.font = 'bold 40px monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(idx===0?'N':'S', 32, 32);
+    const tex = new THREE.CanvasTexture(cv);
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true}));
+    sp.scale.set(0.8,0.8,1); sp.position.set(0, 1.6, z);
+    galvScene.add(sp);
+  });
+  
+  // Connecting yoke
+  const yokeGeo = new THREE.BoxGeometry(1.5, 0.5, 3.6);
+  const yokeMat = new THREE.MeshPhongMaterial({ color: 0x444455, shininess: 30 });
+  ['top','bottom'].forEach((side, i) => {
+    const yoke = new THREE.Mesh(yokeGeo, yokeMat);
+    yoke.position.set(0, i===0?1.6:-1.6, 0);
+    galvScene.add(yoke);
+  });
+  
+  // Radial B field lines
+  for (let a = 0; a < 2*Math.PI; a += Math.PI/6) {
+    const r = 1.2;
+    const pts = [
+      new THREE.Vector3(r*Math.cos(a), r*Math.sin(a), -1.4),
+      new THREE.Vector3(r*Math.cos(a), r*Math.sin(a), 1.4)
+    ];
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const mat = new THREE.LineBasicMaterial({ color: 0x60a5fa, transparent: true, opacity: 0.3 });
+    galvScene.add(new THREE.Line(geo, mat));
+  }
+  
+  // Iron core cylinder
+  const coreGeo = new THREE.CylinderGeometry(0.6, 0.6, 2.8, 20);
+  const coreMat = new THREE.MeshPhongMaterial({ color: 0x2a2a33, shininess: 80 });
+  const core = new THREE.Mesh(coreGeo, coreMat);
+  core.rotation.x = Math.PI/2;
+  galvScene.add(core);
+  
+  // Scale arc
+  const scaleGeo = new THREE.TorusGeometry(2.5, 0.04, 8, 64, Math.PI);
+  const scaleMat = new THREE.MeshBasicMaterial({ color: 0x334455, transparent: true, opacity: 0.6 });
+  const scaleArc = new THREE.Mesh(scaleGeo, scaleMat);
+  scaleArc.position.set(0, -0.5, 2.5);
+  scaleArc.rotation.y = Math.PI/2;
+  galvScene.add(scaleArc);
+  
+  // Scale marks
+  for (let i = -4; i <= 4; i++) {
+    const a = (i / 5) * Math.PI/2;
+    const markGeo = new THREE.BoxGeometry(0.05, 0.2, 0.05);
+    const markMat = new THREE.MeshBasicMaterial({ color: i===0 ? 0xffffff : 0x445566 });
+    const mark = new THREE.Mesh(markGeo, markMat);
+    mark.position.set(2.5*Math.sin(a), -0.5 + 2.5*Math.cos(a) - 2.5, 2.5);
+    galvScene.add(mark);
+  }
+  
+  // Initial coil (will be rebuilt in update)
+  galvCoilGroup = new THREE.Group();
+  galvScene.add(galvCoilGroup);
+}
+
+function updateGalvScene() {
+  // Smooth deflection
+  galvDeflection += (galvTargetDeflection - galvDeflection) * 0.08;
+  
+  // Rebuild coil group
+  galvCoilGroup.rotation.z = galvDeflection * Math.PI / 180;
+  
+  // Clear and rebuild coil
+  while (galvCoilGroup.children.length > 0) galvCoilGroup.remove(galvCoilGroup.children[0]);
+  
+  // Coil frame
+  const coilW = 1.0, coilH = 1.8;
+  const colMat = new THREE.MeshPhongMaterial({ color: 0xfbbf24, emissive: 0xfbbf24, emissiveIntensity: 0.3 });
+  ['front','back','top','bottom'].forEach((side, i) => {
+    let geo;
+    if (i < 2) {
+      geo = new THREE.CylinderGeometry(0.025, 0.025, coilH, 6);
+      const m = new THREE.Mesh(geo, colMat);
+      m.position.set(i===0 ? coilW/2 : -coilW/2, 0, 0);
+      galvCoilGroup.add(m);
+    } else {
+      geo = new THREE.CylinderGeometry(0.025, 0.025, coilW, 6);
+      const m = new THREE.Mesh(geo, colMat);
+      m.rotation.z = Math.PI/2;
+      m.position.set(0, i===2 ? coilH/2 : -coilH/2, 0);
+      galvCoilGroup.add(m);
+    }
+  });
+  
+  // Force arrows on coil sides (if current flowing)
+  if (Math.abs(galvI) > 0.5) {
+    const fDir1 = new THREE.Vector3(0, galvI > 0 ? 1 : -1, 0);
+    const fDir2 = new THREE.Vector3(0, galvI > 0 ? -1 : 1, 0);
+    galvCoilGroup.add(makeArrow(fDir1, new THREE.Vector3(coilW/2, 0, 0), 0.7, 0xf87171, 0.15));
+    galvCoilGroup.add(makeArrow(fDir2, new THREE.Vector3(-coilW/2, 0, 0), 0.7, 0xf87171, 0.15));
+  }
+  
+  // Pointer / needle
+  const needleGeo = new THREE.CylinderGeometry(0.02, 0.005, 2.2, 6);
+  const needleMat = new THREE.MeshPhongMaterial({ color: 0x34d399, emissive: 0x34d399, emissiveIntensity: 0.5 });
+  const needle = new THREE.Mesh(needleGeo, needleMat);
+  needle.position.set(0, 1.1, 0);
+  galvCoilGroup.add(needle);
+  
+  // Pivot dot
+  const pivotGeo = new THREE.SphereGeometry(0.1, 8, 8);
+  const pivotMat = new THREE.MeshPhongMaterial({ color: 0xaaaaaa, shininess: 100 });
+  galvCoilGroup.add(new THREE.Mesh(pivotGeo, pivotMat));
+  
+  document.getElementById('galv-ro-def').textContent = Math.abs(galvDeflection).toFixed(1);
+}
+
+function initGalv3D() { galvReset(); }
+
+// ============================================================
+// INIT
+// ============================================================
+// Ensure home is visible on load
+document.getElementById('home-section').style.display = '';
+</script>
+</body>
+</html>
