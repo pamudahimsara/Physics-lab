@@ -332,6 +332,24 @@ footer {
   text-align: center; font-size: 11px; color: var(--text3);
   font-family: var(--mono);
 }
+
+/* CATEGORY FILTER BUTTONS */
+.cat-btn {
+  font-size: 12px; font-weight: 500; padding: 6px 16px;
+  border-radius: 20px; cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface); color: var(--text2);
+  font-family: var(--sans); transition: all 0.2s;
+}
+.cat-btn:hover { border-color: var(--border2); color: var(--text); }
+.cat-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.topic-num {
+  font-family: var(--mono); font-size: 10px; font-weight: 700;
+  color: var(--text3); margin-bottom: 4px;
+}
+
+.topic-card.hidden { display: none; }
 </style>
 </head>
 <body>
@@ -356,48 +374,371 @@ footer {
   <div class="hero">
     <div class="hero-badge">
       <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3.5"/></svg>
-      Interactive Physics Lab — Now in 3D
+      🇱🇰 Sri Lanka G.C.E. A/L Physics — 42 Practicals + 3D Simulations
     </div>
-    <h1>Understand Physics<br>Through <span>3D</span> <em>Simulation</em></h1>
-    <p>Fully interactive 3D simulations with real equations. Rotate, zoom, and explore magnetic phenomena — from classical field lines to Hall effect and galvanometers.</p>
+    <h1>Master A/L Physics<br>Through <span>3D</span> <em>Simulation</em></h1>
+    <p>All 42 Sri Lankan A/L Physics practicals with interactive 3D simulations. Rotate, zoom, and explore — from mechanics to electronics. Physics constants verified to NIST/CODATA standards.</p>
   </div>
 
-  <div class="topics-grid">
-    <div class="topic-card" onclick="showSim('mag')">
+  <!-- Category filter -->
+  <div style="max-width:1100px;margin:0 auto;padding:0 2rem 1.5rem;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+    <button class="cat-btn active" onclick="filterCat('all')">All (42)</button>
+    <button class="cat-btn" onclick="filterCat('mechanics')">⚙️ Mechanics &amp; Matter</button>
+    <button class="cat-btn" onclick="filterCat('heat')">🌡️ Heat</button>
+    <button class="cat-btn" onclick="filterCat('waves')">🌊 Waves &amp; Optics</button>
+    <button class="cat-btn" onclick="filterCat('elec')">⚡ Electricity &amp; Electronics</button>
+    <button class="cat-btn" onclick="filterCat('3d')">⬡ 3D Only</button>
+  </div>
+
+  <div class="topics-grid" id="practicals-grid">
+    <!-- 3D SIMULATIONS (existing) -->
+    <div class="topic-card" data-cat="elec 3d" onclick="showSim('mag')">
       <div class="topic-icon">🧲</div>
       <div class="topic-title">Magnetic Fields</div>
       <div class="topic-desc">3D field lines, force on moving charges, solenoids.</div>
-      <span class="topic-badge badge-3d">⬡ 3D</span>
+      <span class="topic-badge badge-3d">⬡ 3D Live</span>
     </div>
-    <div class="topic-card" onclick="showSim('hall')">
+    <div class="topic-card" data-cat="elec 3d" onclick="showSim('hall')">
       <div class="topic-icon">🔷</div>
       <div class="topic-title">Hall Effect</div>
       <div class="topic-desc">Charge separation in 3D conductor with transverse B field.</div>
-      <span class="topic-badge badge-3d">⬡ 3D</span>
+      <span class="topic-badge badge-3d">⬡ 3D Live</span>
     </div>
-    <div class="topic-card" onclick="showSim('fbqv')">
+    <div class="topic-card" data-cat="elec 3d" onclick="showSim('fbqv')">
       <div class="topic-icon">⚡</div>
       <div class="topic-title">F = BQV sin θ</div>
-      <div class="topic-desc">Explore Lorentz force applications: CRT beam, rail gun, mass spectrometer.</div>
-      <span class="topic-badge badge-3d">⬡ 3D</span>
+      <div class="topic-desc">Lorentz force: CRT beam, cyclotron, rail gun in 3D.</div>
+      <span class="topic-badge badge-3d">⬡ 3D Live</span>
     </div>
-    <div class="topic-card" onclick="showSim('cci')">
+    <div class="topic-card" data-cat="elec 3d" onclick="showSim('cci')">
       <div class="topic-icon">⟷</div>
       <div class="topic-title">Current–Current</div>
       <div class="topic-desc">Force between parallel wires with visualized field interactions.</div>
-      <span class="topic-badge badge-3d">⬡ 3D</span>
+      <span class="topic-badge badge-3d">⬡ 3D Live</span>
     </div>
-    <div class="topic-card" onclick="showSim('galv')">
+    <div class="topic-card" data-cat="elec 3d" onclick="showSim('galv')">
       <div class="topic-icon">🔭</div>
       <div class="topic-title">Moving Coil Galvanometer</div>
       <div class="topic-desc">Animated 3D coil deflecting against spring torque.</div>
-      <span class="topic-badge badge-3d">⬡ 3D</span>
+      <span class="topic-badge badge-3d">⬡ 3D Live</span>
     </div>
-    <div class="topic-card" onclick="alert('Coming soon!')">
+    <!-- NEW 3D SIMULATIONS -->
+    <div class="topic-card" data-cat="mechanics 3d" onclick="showSim('pendulum')">
+      <div class="topic-icon">🕰️</div>
+      <div class="topic-num">#10</div>
+      <div class="topic-title">Simple Pendulum</div>
+      <div class="topic-desc">Determine acceleration due to gravity using the simple pendulum. T = 2π√(l/g)</div>
+      <span class="topic-badge badge-3d">⬡ 3D Live</span>
+    </div>
+    <div class="topic-card" data-cat="mechanics 3d" onclick="showSim('spring')">
+      <div class="topic-icon">🌀</div>
+      <div class="topic-num">#11</div>
+      <div class="topic-title">Helix Spring Oscillation</div>
+      <div class="topic-desc">Verify the relationship between mass and period of oscillation for a spring.</div>
+      <span class="topic-badge badge-3d">⬡ 3D Live</span>
+    </div>
+    <div class="topic-card" data-cat="waves 3d" onclick="showSim('sonometer')">
+      <div class="topic-icon">🎵</div>
+      <div class="topic-num">#12</div>
+      <div class="topic-title">Sonometer</div>
+      <div class="topic-desc">Determine frequency of tuning fork; verify string frequency vs. length relationship.</div>
+      <span class="topic-badge badge-3d">⬡ 3D Live</span>
+    </div>
+    <div class="topic-card" data-cat="waves 3d" onclick="showSim('resonance')">
+      <div class="topic-icon">🔊</div>
+      <div class="topic-num">#14</div>
+      <div class="topic-title">Resonance Tube</div>
+      <div class="topic-desc">Determine velocity of sound using a closed resonance tube and tuning fork.</div>
+      <span class="topic-badge badge-3d">⬡ 3D Live</span>
+    </div>
+    <div class="topic-card" data-cat="elec 3d" onclick="showSim('diode')">
+      <div class="topic-icon">🔌</div>
+      <div class="topic-num">#35</div>
+      <div class="topic-title">I-V Curve: Diode</div>
+      <div class="topic-desc">Construct the I-V curve for a forward biased semiconductor diode.</div>
+      <span class="topic-badge badge-3d">⬡ 3D Live</span>
+    </div>
+
+    <!-- MECHANICS & PROPERTIES OF MATTER -->
+    <div class="topic-card" data-cat="mechanics" onclick="openInfo('#1','Usage of Vernier Callipers','Measure internal/external diameters and depths. Use the main scale + vernier scale to get readings accurate to 0.1mm.','LC = 1 MSD − 1 VSD = 0.1mm','Easy')">
+      <div class="topic-num">#1</div>
+      <div class="topic-icon">📏</div>
+      <div class="topic-title">Vernier Callipers</div>
+      <div class="topic-desc">Usage of the vernier callipers — measure diameters and depths accurately.</div>
+      <span class="topic-badge badge-live">Easy</span>
+    </div>
+    <div class="topic-card" data-cat="mechanics" onclick="openInfo('#2','Micrometer Screwgauge','Measure small lengths accurate to 0.01mm using the thimble scale and sleeve scale readings.','LC = 0.01mm = 0.001cm','Easy')">
+      <div class="topic-num">#2</div>
+      <div class="topic-icon">🔩</div>
+      <div class="topic-title">Micrometer Screwgauge</div>
+      <div class="topic-desc">Usage of the micrometer — accurate measurements to 0.01mm.</div>
+      <span class="topic-badge badge-live">Easy</span>
+    </div>
+    <div class="topic-card" data-cat="mechanics" onclick="openInfo('#3','Spherometer','Determine the radius of curvature of a spherical surface. Used to measure very small elevations.','R = (a²/6h) + h/2','Easy')">
+      <div class="topic-num">#3</div>
+      <div class="topic-icon">🔵</div>
+      <div class="topic-title">Spherometer</div>
+      <div class="topic-desc">Determine the radius of curvature of a spherical surface.</div>
+      <span class="topic-badge badge-live">Easy</span>
+    </div>
+    <div class="topic-card" data-cat="mechanics" onclick="openInfo('#5','Law of Parallelogram of Forces','Verify the parallelogram law and determine the mass of a body using force equilibrium.','R² = P² + Q² + 2PQ cosθ','Medium')">
+      <div class="topic-num">#5</div>
+      <div class="topic-icon">⚖️</div>
+      <div class="topic-title">Parallelogram of Forces</div>
+      <div class="topic-desc">Verify the law of parallelogram of forces and determine mass of a body.</div>
+      <span class="topic-badge badge-live">Medium</span>
+    </div>
+    <div class="topic-card" data-cat="mechanics" onclick="openInfo('#6','Principle of Moments','Determine the mass of a body using the principle of moments on a balanced beam.','F₁d₁ = F₂d₂','Easy')">
+      <div class="topic-num">#6</div>
+      <div class="topic-icon">⚖️</div>
+      <div class="topic-title">Principle of Moments</div>
+      <div class="topic-desc">Determine mass of a body using the principle of moments.</div>
+      <span class="topic-badge badge-live">Easy</span>
+    </div>
+    <div class="topic-card" data-cat="mechanics" onclick="openInfo('#7','Relative Density (U-tube)','Determine the relative density of a liquid using the U-tube method with two immiscible liquids.','ρ₁/ρ₂ = h₂/h₁','Medium')">
+      <div class="topic-num">#7</div>
+      <div class="topic-icon">🧪</div>
+      <div class="topic-title">Relative Density (U-tube)</div>
+      <div class="topic-desc">Determine relative density of a liquid using the U tube.</div>
+      <span class="topic-badge badge-live">Medium</span>
+    </div>
+    <div class="topic-card" data-cat="mechanics" onclick="openInfo(\"#8\",\"Hare's Apparatus\",\"Determine the relative density of a liquid using Hare's apparatus based on pressure equilibrium.\",\"ρ = h₁/h₂\",\"Medium\")">
+      <div class="topic-num">#8</div>
+      <div class="topic-icon">🧫</div>
+      <div class="topic-title">Hare's Apparatus</div>
+      <div class="topic-desc">Determine relative density using Hare's apparatus.</div>
+      <span class="topic-badge badge-live">Medium</span>
+    </div>
+    <div class="topic-card" data-cat="mechanics" onclick="openInfo('#9','Density via Weighted Test Tube','Determine the density of a liquid using a weighted test tube as a hydrometer.','ρ = m/V','Easy')">
+      <div class="topic-num">#9</div>
+      <div class="topic-icon">🔬</div>
+      <div class="topic-title">Density (Test Tube)</div>
+      <div class="topic-desc">Determine density of a liquid using a weighted test tube.</div>
+      <span class="topic-badge badge-live">Easy</span>
+    </div>
+    <div class="topic-card" data-cat="mechanics" onclick="openInfo(\"#38\",\"Young's Modulus\",\"Determine Young's modulus of steel wire by measuring extension under load.\",\"E = (FL)/(AΔL)\",\"Hard\")">
+      <div class="topic-num">#38</div>
+      <div class="topic-icon">🔗</div>
+      <div class="topic-title">Young's Modulus</div>
+      <div class="topic-desc">Determine Young's modulus of steel wire by measuring extension.</div>
+      <span class="topic-badge" style="background:rgba(255,123,75,0.15);color:var(--warn);">Hard</span>
+    </div>
+    <div class="topic-card" data-cat="mechanics" onclick="openInfo('#39','Coefficient of Viscosity','Determine viscosity of water by capillary flow method using Poiseuille formula.','η = (πPr⁴)/(8lQ)','Hard')">
+      <div class="topic-num">#39</div>
+      <div class="topic-icon">💧</div>
+      <div class="topic-title">Coefficient of Viscosity</div>
+      <div class="topic-desc">Determine viscosity of water using Poiseuille's formula.</div>
+      <span class="topic-badge" style="background:rgba(255,123,75,0.15);color:var(--warn);">Hard</span>
+    </div>
+    <div class="topic-card" data-cat="mechanics" onclick="openInfo('#40','Surface Tension (Slide)','Determine surface tension of water using a microscope slide and the pull force method.','T = F / (2L)','Medium')">
+      <div class="topic-num">#40</div>
+      <div class="topic-icon">🫧</div>
+      <div class="topic-title">Surface Tension (Slide)</div>
+      <div class="topic-desc">Determine surface tension of water using a microscope slide.</div>
+      <span class="topic-badge badge-live">Medium</span>
+    </div>
+    <div class="topic-card" data-cat="mechanics" onclick="openInfo('#41','Surface Tension (Capillary)','Determine surface tension by the capillary rise method.','T = (hρgr)/2','Medium')">
+      <div class="topic-num">#41</div>
       <div class="topic-icon">🌊</div>
-      <div class="topic-title">Wave Mechanics</div>
-      <div class="topic-desc">Interference, diffraction and standing waves.</div>
-      <span class="topic-badge badge-soon">Coming Soon</span>
+      <div class="topic-title">Surface Tension (Capillary)</div>
+      <div class="topic-desc">Determine surface tension of water by capillary rise method.</div>
+      <span class="topic-badge badge-live">Medium</span>
+    </div>
+    <div class="topic-card" data-cat="mechanics" onclick="openInfo(\"#42\",\"Surface Tension (Jaeger's)\",\"Determine surface tension of a liquid by Jaeger's method using air bubbles.\",\"T = r(P - h·ρ·g)/2\",\"Hard\")">
+      <div class="topic-num">#42</div>
+      <div class="topic-icon">🫧</div>
+      <div class="topic-title">Surface Tension (Jaeger)</div>
+      <div class="topic-desc">Determine surface tension by Jaeger's method using air bubbles.</div>
+      <span class="topic-badge" style="background:rgba(255,123,75,0.15);color:var(--warn);">Hard</span>
+    </div>
+
+    <!-- HEAT -->
+    <div class="topic-card" data-cat="heat" onclick="openInfo('#22','Atmospheric Pressure (Quill Tube)','Determine atmospheric pressure using a quill tube sealed at one end with a column of air.','PV = P₀V₀ (Boyle\\'s Law)','Medium')">
+      <div class="topic-num">#22</div>
+      <div class="topic-icon">🌬️</div>
+      <div class="topic-title">Atmospheric Pressure</div>
+      <div class="topic-desc">Determine atmospheric pressure using the quill tube.</div>
+      <span class="topic-badge badge-live">Medium</span>
+    </div>
+    <div class="topic-card" data-cat="heat" onclick="openInfo('#23','Charles\\' Law','Verify the relationship between volume and temperature of a gas at constant pressure.','V/T = constant','Medium')">
+      <div class="topic-num">#23</div>
+      <div class="topic-icon">🌡️</div>
+      <div class="topic-title">Charles' Law (V vs T)</div>
+      <div class="topic-desc">Verify volume–temperature relationship at constant pressure.</div>
+      <span class="topic-badge badge-live">Medium</span>
+    </div>
+    <div class="topic-card" data-cat="heat" onclick="openInfo('#24','Gay-Lussac\\' Law','Verify the relationship between pressure and absolute temperature of a gas at constant volume.','P/T = constant','Medium')">
+      <div class="topic-num">#24</div>
+      <div class="topic-icon">🔥</div>
+      <div class="topic-title">Gay-Lussac's Law (P vs T)</div>
+      <div class="topic-desc">Verify pressure–temperature relationship at constant volume.</div>
+      <span class="topic-badge badge-live">Medium</span>
+    </div>
+    <div class="topic-card" data-cat="heat" onclick="openInfo('#25','Specific Heat Capacity (Solid)','Determine specific heat capacity of a solid by the method of mixtures using a calorimeter.','mcΔT = m₀c₀ΔT₀','Medium')">
+      <div class="topic-num">#25</div>
+      <div class="topic-icon">♨️</div>
+      <div class="topic-title">Specific Heat (Solid)</div>
+      <div class="topic-desc">Determine specific heat capacity of a solid by method of mixtures.</div>
+      <span class="topic-badge badge-live">Medium</span>
+    </div>
+    <div class="topic-card" data-cat="heat" onclick="openInfo('#26','Specific Heat Capacity (Liquid)','Determine specific heat capacity of a liquid by the method of cooling using Newton\\'s law.','dQ/dt ∝ (T - T₀)','Hard')">
+      <div class="topic-num">#26</div>
+      <div class="topic-icon">❄️</div>
+      <div class="topic-title">Specific Heat (Liquid)</div>
+      <div class="topic-desc">Determine specific heat capacity of a liquid by method of cooling.</div>
+      <span class="topic-badge" style="background:rgba(255,123,75,0.15);color:var(--warn);">Hard</span>
+    </div>
+    <div class="topic-card" data-cat="heat" onclick="openInfo('#27','Latent Heat of Fusion','Determine the specific latent heat of fusion of ice by the method of mixtures.','Q = mL','Medium')">
+      <div class="topic-num">#27</div>
+      <div class="topic-icon">🧊</div>
+      <div class="topic-title">Latent Heat of Fusion</div>
+      <div class="topic-desc">Determine specific latent heat of fusion of ice by mixtures method.</div>
+      <span class="topic-badge badge-live">Medium</span>
+    </div>
+    <div class="topic-card" data-cat="heat" onclick="openInfo('#28','Latent Heat of Vaporization','Determine specific latent heat of vaporization of water by the method of mixtures.','Q = mL_v','Hard')">
+      <div class="topic-num">#28</div>
+      <div class="topic-icon">💨</div>
+      <div class="topic-title">Latent Heat of Vaporization</div>
+      <div class="topic-desc">Determine specific latent heat of vaporization of water.</div>
+      <span class="topic-badge" style="background:rgba(255,123,75,0.15);color:var(--warn);">Hard</span>
+    </div>
+    <div class="topic-card" data-cat="heat" onclick="openInfo('#29','Relative Humidity','Determine relative humidity of air using a polished calorimeter and dew point method.','RH = (SVP at dew point)/(SVP at air temp)','Hard')">
+      <div class="topic-num">#29</div>
+      <div class="topic-icon">💧</div>
+      <div class="topic-title">Relative Humidity</div>
+      <div class="topic-desc">Determine relative humidity using a polished calorimeter.</div>
+      <span class="topic-badge" style="background:rgba(255,123,75,0.15);color:var(--warn);">Hard</span>
+    </div>
+    <div class="topic-card" data-cat="heat" onclick="openInfo('#30','Thermal Conductivity (Searle)','Determine thermal conductivity of a metal bar by Searle\\'s method using steady-state heat flow.','k = (mcΔT/Δt) × (d/AΔθ)','Hard')">
+      <div class="topic-num">#30</div>
+      <div class="topic-icon">🔆</div>
+      <div class="topic-title">Thermal Conductivity</div>
+      <div class="topic-desc">Determine thermal conductivity by Searle's method.</div>
+      <span class="topic-badge" style="background:rgba(255,123,75,0.15);color:var(--warn);">Hard</span>
+    </div>
+
+    <!-- WAVES & OPTICS -->
+    <div class="topic-card" data-cat="waves" onclick="openInfo('#4','Travelling Microscope','Measure small distances and refractive indices using the travelling microscope\\'s vernier scale.','LC = 0.01mm','Medium')">
+      <div class="topic-num">#4</div>
+      <div class="topic-icon">🔭</div>
+      <div class="topic-title">Travelling Microscope</div>
+      <div class="topic-desc">Usage of the travelling microscope for precise measurements.</div>
+      <span class="topic-badge badge-live">Medium</span>
+    </div>
+    <div class="topic-card" data-cat="waves" onclick="openInfo('#15','Resonance Tube (Set of Forks)','Determine velocity of sound using a closed resonance tube and a set of tuning forks.','v = 2f(l₂ - l₁)','Hard')">
+      <div class="topic-num">#15</div>
+      <div class="topic-icon">🎼</div>
+      <div class="topic-title">Resonance Tube (Forks Set)</div>
+      <div class="topic-desc">Determine velocity of sound using a set of tuning forks.</div>
+      <span class="topic-badge" style="background:rgba(255,123,75,0.15);color:var(--warn);">Hard</span>
+    </div>
+    <div class="topic-card" data-cat="waves" onclick="openInfo('#16','Refractive Index (Microscope)','Determine refractive index of glass using the travelling microscope and real/apparent depth.','n = Real depth / Apparent depth','Medium')">
+      <div class="topic-num">#16</div>
+      <div class="topic-icon">🔬</div>
+      <div class="topic-title">Refractive Index (Microscope)</div>
+      <div class="topic-desc">Determine refractive index of glass using the travelling microscope.</div>
+      <span class="topic-badge badge-live">Medium</span>
+    </div>
+    <div class="topic-card" data-cat="waves" onclick="openInfo('#17a','Minimum Deviation (Variation)','Determine angle of minimum deviation of a prism by observing variation in deviation.','n = sin((A+D)/2)/sin(A/2)','Hard')">
+      <div class="topic-num">#17a</div>
+      <div class="topic-icon">🔺</div>
+      <div class="topic-title">Minimum Deviation (Graph)</div>
+      <div class="topic-desc">Determine minimum deviation of a prism by deviation-angle graph.</div>
+      <span class="topic-badge" style="background:rgba(255,123,75,0.15);color:var(--warn);">Hard</span>
+    </div>
+    <div class="topic-card" data-cat="waves" onclick="openInfo('#17b','Spectrometer & Prism','Use a spectrometer to determine minimum deviation and refractive index of a prism material.','n = sin((A+Dₘ)/2)/sin(A/2)','Hard')">
+      <div class="topic-num">#17b</div>
+      <div class="topic-icon">🌈</div>
+      <div class="topic-title">Spectrometer & Prism</div>
+      <div class="topic-desc">Use a spectrometer to determine prism refractive index.</div>
+      <span class="topic-badge" style="background:rgba(255,123,75,0.15);color:var(--warn);">Hard</span>
+    </div>
+    <div class="topic-card" data-cat="waves" onclick="openInfo('#18','Critical Angle Method','Determine refractive index of prism material by the critical angle method.','n = 1/sin(C)','Hard')">
+      <div class="topic-num">#18</div>
+      <div class="topic-icon">💡</div>
+      <div class="topic-title">Critical Angle Method</div>
+      <div class="topic-desc">Determine refractive index by the critical angle method.</div>
+      <span class="topic-badge" style="background:rgba(255,123,75,0.15);color:var(--warn);">Hard</span>
+    </div>
+    <div class="topic-card" data-cat="waves" onclick="openInfo('#19','Spectrometer Adjustment','Adjust a spectrometer and determine the refracting angle of a prism.','2A = θ₁ + θ₂ (reflected beams)','Hard')">
+      <div class="topic-num">#19</div>
+      <div class="topic-icon">🔭</div>
+      <div class="topic-title">Spectrometer Setup</div>
+      <div class="topic-desc">Adjust spectrometer and determine refracting angle of a prism.</div>
+      <span class="topic-badge" style="background:rgba(255,123,75,0.15);color:var(--warn);">Hard</span>
+    </div>
+    <div class="topic-card" data-cat="waves" onclick="openInfo('#21a','Convex Lens Focal Length','Locate images formed by a convex lens by no-parallax method and determine focal length.','1/f = 1/v - 1/u','Medium')">
+      <div class="topic-num">#21a</div>
+      <div class="topic-icon">🔍</div>
+      <div class="topic-title">Convex Lens Focal Length</div>
+      <div class="topic-desc">Determine focal length of a convex lens by no-parallax method.</div>
+      <span class="topic-badge badge-live">Medium</span>
+    </div>
+    <div class="topic-card" data-cat="waves" onclick="openInfo('#21b','Concave Lens Focal Length','Locate images formed by a concave lens by no-parallax method and determine focal length.','1/f = 1/v - 1/u','Hard')">
+      <div class="topic-num">#21b</div>
+      <div class="topic-icon">🔎</div>
+      <div class="topic-title">Concave Lens Focal Length</div>
+      <div class="topic-desc">Determine focal length of a concave lens by no-parallax method.</div>
+      <span class="topic-badge" style="background:rgba(255,123,75,0.15);color:var(--warn);">Hard</span>
+    </div>
+
+    <!-- ELECTRICITY & ELECTRONICS -->
+    <div class="topic-card" data-cat="elec" onclick="openInfo('#31','EMF & Internal Resistance','Determine the EMF and internal resistance of a dry cell using a variable resistor and voltmeter.','V = E − Ir','Medium')">
+      <div class="topic-num">#31</div>
+      <div class="topic-icon">🔋</div>
+      <div class="topic-title">EMF & Internal Resistance</div>
+      <div class="topic-desc">Determine EMF and internal resistance of a dry cell.</div>
+      <span class="topic-badge badge-live">Medium</span>
+    </div>
+    <div class="topic-card" data-cat="elec" onclick="openInfo('#32','Temperature Coefficient (Bridge)','Determine temperature coefficient of resistance of copper using the Metre Bridge.','R = R₀(1 + αT)','Hard')">
+      <div class="topic-num">#32</div>
+      <div class="topic-icon">🌡️</div>
+      <div class="topic-title">Temp. Coefficient (Bridge)</div>
+      <div class="topic-desc">Determine temperature coefficient of resistance using the Metre Bridge.</div>
+      <span class="topic-badge" style="background:rgba(255,123,75,0.15);color:var(--warn);">Hard</span>
+    </div>
+    <div class="topic-card" data-cat="elec" onclick="openInfo('#33','EMF Comparison (Potentiometer)','Compare EMFs of two cells using the potentiometer by null deflection method.','E₁/E₂ = l₁/l₂','Medium')">
+      <div class="topic-num">#33</div>
+      <div class="topic-icon">⚡</div>
+      <div class="topic-title">EMF Comparison (Potentiometer)</div>
+      <div class="topic-desc">Compare EMFs of two cells using the potentiometer.</div>
+      <span class="topic-badge badge-live">Medium</span>
+    </div>
+    <div class="topic-card" data-cat="elec" onclick="openInfo('#34','Internal Resistance (Potentiometer)','Determine internal resistance of a cell using the potentiometer.','r = R(l₁/l₂ − 1)','Hard')">
+      <div class="topic-num">#34</div>
+      <div class="topic-icon">🔌</div>
+      <div class="topic-title">Internal Resistance (Potentiometer)</div>
+      <div class="topic-desc">Determine internal resistance of a cell using the potentiometer.</div>
+      <span class="topic-badge" style="background:rgba(255,123,75,0.15);color:var(--warn);">Hard</span>
+    </div>
+    <div class="topic-card" data-cat="elec" onclick="openInfo('#36','Transistor Transfer Characteristic','Construct the transfer characteristic (I_B vs I_C) of a transistor in common emitter.','I_C = β × I_B','Hard')">
+      <div class="topic-num">#36</div>
+      <div class="topic-icon">📡</div>
+      <div class="topic-title">Transistor Characteristics</div>
+      <div class="topic-desc">Construct transfer characteristic I_B vs I_C in common emitter configuration.</div>
+      <span class="topic-badge" style="background:rgba(255,123,75,0.15);color:var(--warn);">Hard</span>
+    </div>
+    <div class="topic-card" data-cat="elec" onclick="openInfo('#37','Logic Gates','Investigate truth tables of fundamental logic gates and identify given gates experimentally.','AND/OR/NOT/NAND/NOR/XOR','Easy')">
+      <div class="topic-num">#37</div>
+      <div class="topic-icon">💻</div>
+      <div class="topic-title">Logic Gates</div>
+      <div class="topic-desc">Investigate truth tables of logic gates and identify given gates.</div>
+      <span class="topic-badge badge-live">Easy</span>
+    </div>
+  </div>
+</div>
+
+<!-- INFO MODAL -->
+<div id="info-modal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(7,9,16,0.88);backdrop-filter:blur(10px);align-items:center;justify-content:center;">
+  <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:18px;padding:2rem;max-width:480px;width:90%;position:relative;">
+    <button onclick="document.getElementById('info-modal').style.display='none'" style="position:absolute;top:1rem;right:1rem;background:var(--surface);border:1px solid var(--border);color:var(--text2);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:13px;">✕</button>
+    <div id="info-num" style="font-family:var(--mono);font-size:11px;color:var(--accent3);margin-bottom:4px;"></div>
+    <h3 id="info-title" style="font-size:1.2rem;font-weight:600;color:var(--text);margin-bottom:0.75rem;"></h3>
+    <div id="info-difficulty" style="margin-bottom:1rem;"></div>
+    <p id="info-desc" style="font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:1rem;"></p>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:0.875rem;">
+      <div style="font-size:10px;font-family:var(--mono);color:var(--accent2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Key Formula</div>
+      <div id="info-formula" style="font-family:var(--mono);font-size:15px;color:var(--accent);font-weight:700;"></div>
     </div>
   </div>
 </div>
@@ -464,7 +805,7 @@ footer {
   <div class="sim-layout">
     <div class="canvas-card">
       <div class="canvas-header">
-        <div class="canvas-title"><div class="live-dot"></div><span>Hall Effect — Current in +x, B in +y → force in ±z</span></div>
+        <div class="canvas-title"><div class="live-dot"></div><span>Hall Effect — Current in +x, B in +z → force in ±y</span></div>
         <div class="canvas-controls-top">
           <button class="btn-sm primary" onclick="hallReset()">Reset</button>
         </div>
@@ -542,7 +883,7 @@ footer {
             <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div> Charge carriers (moving)</div>
             <div class="legend-item"><div class="legend-dot" style="background:#f87171"></div> Positive Hall side</div>
             <div class="legend-item"><div class="legend-dot" style="background:#34d399"></div> Negative Hall side</div>
-            <div class="legend-item"><div class="legend-line" style="background:#00d4aa"></div> B field arrows (y-axis, upward)</div>
+            <div class="legend-line" style="background:#00d4aa"></div> B field arrows (z-axis)</div>
         </div>
       </div>
     </div>
@@ -741,7 +1082,7 @@ footer {
           <div class="legend-item"><div class="legend-dot" style="background:#4f8eff"></div> Wire 2 (direction toggleable)</div>
           <div class="legend-item"><div class="legend-line" style="background:#f87171"></div> Repulsion force arrows</div>
           <div class="legend-item"><div class="legend-line" style="background:#34d399"></div> Attraction force arrows</div>
-          <div class="legend-item"><div class="legend-line" style="background:rgba(167,139,250,0.4)"></div> Circular B field rings</div>
+          <div class="legend-line" style="background:rgba(167,139,250,0.4)"></div> Circular B field rings</div>
         </div></div>
       </div>
     </div>
@@ -844,19 +1185,36 @@ footer {
           <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div> Current-carrying coil</div>
           <div class="legend-item"><div class="legend-dot" style="background:#f87171"></div> Deflecting force arrows</div>
           <div class="legend-item"><div class="legend-dot" style="background:#34d399"></div> Pointer / indicator needle</div>
-          <div class="legend-item"><div class="legend-line" style="background:#60a5fa"></div> Radial B field lines</div>
+          <div class="legend-line" style="background:#60a5fa"></div> Radial B field lines</div>
         </div></div>
       </div>
     </div>
   </div>
 </div>
 
-<footer>PhysicsLab 3D v2.0 — All simulations use Three.js WebGL rendering &nbsp;·&nbsp; Equations based on SI units &nbsp;·&nbsp; Designed for excellence by AXIRON · 2026</footer>
+<footer>PhysicsLab 3D v2.1 — All simulations use Three.js WebGL rendering &nbsp;·&nbsp; Equations based on SI units &nbsp;·&nbsp; Physics constants verified to NIST/CODATA standards</footer>
 
 <script>
 // ============================================================
-// NAVIGATION
+// PHYSICS CONSTANTS (NIST/CODATA 2018)
 // ============================================================
+const PHYS = {
+  g:       9.80665,      // m/s² — standard acceleration of gravity
+  c:       299792458,    // m/s  — speed of light in vacuum
+  e:       1.602176634e-19, // C — elementary charge (exact, SI 2019)
+  me:      9.1093837015e-31, // kg — electron rest mass
+  mp:      1.67262192369e-27, // kg — proton rest mass
+  mu0:     4*Math.PI*1e-7,   // H/m — permeability of free space
+  eps0:    8.8541878128e-12, // F/m — permittivity of free space
+  kB:      1.380649e-23, // J/K — Boltzmann constant (exact, SI 2019)
+  h:       6.62607015e-34, // J·s — Planck constant (exact, SI 2019)
+  NA:      6.02214076e23, // mol⁻¹ — Avogadro constant
+  R:       8.314462618,  // J/(mol·K) — molar gas constant
+  // Derived
+  Vt300:   0.025852,     // V — thermal voltage k_B×300/e at 300K
+};
+Object.freeze(PHYS);
+
 let activeRenderer = null;
 function disposeRenderer(r) { if (r) { r.dispose(); } }
 
@@ -871,13 +1229,11 @@ function showSim(id) {
   document.querySelectorAll('.sim-section').forEach(s => s.classList.remove('active'));
   document.getElementById('sim-' + id).classList.add('active');
   stopAllLoops();
-  requestAnimationFrame(() => {
-    if (id === 'mag') initMag3D();
-    if (id === 'hall') initHall3D();
-    if (id === 'fbqv') initFBQV3D('crt');
-    if (id === 'cci') initCCI3D();
-    if (id === 'galv') initGalv3D();
-  });
+  if (id === 'mag') initMag3D();
+  if (id === 'hall') initHall3D();
+  if (id === 'fbqv') initFBQV3D('crt');
+  if (id === 'cci') initCCI3D();
+  if (id === 'galv') initGalv3D();
 }
 
 let animLoops = {};
@@ -898,34 +1254,19 @@ function createBaseScene(bgColor = 0x050709) {
 
 function createRenderer(containerId) {
   const wrap = document.getElementById(containerId);
-  const w = wrap.clientWidth || wrap.offsetWidth || (window.innerWidth > 900 ? window.innerWidth - 420 : window.innerWidth - 32);
-  const h = 480;
+  const w = wrap.clientWidth, h = wrap.clientHeight;
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(w, h);
   renderer.shadowMap.enabled = true;
+  // Clear existing canvas
   while(wrap.querySelector('canvas')) wrap.removeChild(wrap.querySelector('canvas'));
   wrap.appendChild(renderer.domElement);
-  renderer.domElement.style.width = '100%';
-  renderer.domElement.style.height = '100%';
-  const ro = new ResizeObserver(() => {
-    const nw = wrap.clientWidth, nh = wrap.clientHeight;
-    if (nw > 0 && nh > 0) {
-      renderer.setSize(nw, nh);
-      if (renderer._camera) {
-        renderer._camera.aspect = nw / nh;
-        renderer._camera.updateProjectionMatrix();
-      }
-    }
-  });
-  ro.observe(wrap);
-  renderer._ro = ro;
   return renderer;
 }
 
 function createCamera(w, h, z = 8) {
-  const safeW = w || 800, safeH = h || 480;
-  const cam = new THREE.PerspectiveCamera(55, safeW / safeH, 0.01, 1000);
+  const cam = new THREE.PerspectiveCamera(55, w/h, 0.01, 1000);
   cam.position.set(4, 3, z);
   cam.lookAt(0, 0, 0);
   return cam;
@@ -1039,7 +1380,7 @@ function magSwitchMode(m) {
 
 function magReset() {
   if (animLoops.mag) { cancelAnimationFrame(animLoops.mag); delete animLoops.mag; }
-  if (magRenderer) { if (magRenderer._ro) magRenderer._ro.disconnect(); magRenderer.dispose(); }
+  if (magRenderer) { magRenderer.dispose(); }
   
   magScene = createBaseScene(0x050709);
   addLights(magScene);
@@ -1047,8 +1388,7 @@ function magReset() {
   
   const wrap = document.getElementById('mag-3d-wrap');
   magRenderer = createRenderer('mag-3d-wrap');
-  magCamera = createCamera(wrap.clientWidth || 800, 480, 9);
-  magRenderer._camera = magCamera;
+  magCamera = createCamera(wrap.clientWidth, wrap.clientHeight, 9);
   setupOrbit(magRenderer, magCamera);
 
   if (magMode === 'field') buildMagFieldScene();
@@ -1144,7 +1484,7 @@ function buildMagChargeScene() {
   const lbl = document.createElement('canvas'); lbl.width=256; lbl.height=64;
   const lctx = lbl.getContext('2d');
   lctx.fillStyle = 'rgba(167,139,250,0.8)'; lctx.font='20px Space Mono,monospace';
-  lctx.fillText('B field ⊙ out of page', 10, 40);
+  lctx.fillText('B field ⊗ into page', 10, 40);
   const ltex = new THREE.CanvasTexture(lbl);
   const lsp = new THREE.Sprite(new THREE.SpriteMaterial({map:ltex, transparent:true}));
   lsp.scale.set(3,0.75,1); lsp.position.set(2.5, 2.5, 0);
@@ -1205,9 +1545,9 @@ function updateMagScene() {
     
     magScene.add(magParticleGroup);
     
-    const radius_m = (9.11e-31 * magParticleSpeed*1e6) / (1.6e-19 * magFieldStrength);
+    const radius_m = (PHYS.mp * magParticleSpeed*1e6) / (PHYS.e * magFieldStrength);
     document.getElementById('mag-ro-field').textContent = magFieldStrength.toFixed(2);
-    document.getElementById('mag-ro-force').textContent = (1.6e-19 * magParticleSpeed*1e6 * magFieldStrength).toExponential(2);
+    document.getElementById('mag-ro-force').textContent = (PHYS.e * magParticleSpeed*1e6 * magFieldStrength).toExponential(2);
     document.getElementById('mag-ro-vel').textContent = magParticleSpeed.toFixed(1);
     document.getElementById('mag-ro-radius').textContent = radius_m.toFixed(3);
   } else if (magMode === 'solenoid') {
@@ -1215,8 +1555,10 @@ function updateMagScene() {
     magScene.children.forEach(c => {
       if (c.userData.isSolLine) c.material.opacity = 0.4 + 0.2 * Math.sin(t * 2 + c.userData.phase);
     });
-    const Bval = (4*Math.PI*1e-7 * magSolCurrent * (magSolTurns / 4.0)).toFixed(5); // B = μ₀·n·I, n = N/L, L=4
-    document.getElementById('mag-ro-field').textContent = parseFloat(Bval).toExponential(2);
+    // B = μ₀ n I = μ₀ (N/L) I, solenoid length = 4m (visual), L_sol = 4
+    const L_sol = 4.0;
+    const Bval = (PHYS.mu0 * (magSolTurns / L_sol) * magSolCurrent).toFixed(8);
+    document.getElementById('mag-ro-field').textContent = parseFloat(Bval).toExponential(3);
   }
 }
 
@@ -1292,14 +1634,17 @@ function hallSetType(t) {
 }
 
 function updateHallReadouts() {
-  const vh = (hallI * hallB / (1e19 * 1.6e-19 * 0.005)).toFixed(4);
-  document.getElementById('hall-ro-vh').textContent = parseFloat(vh).toFixed(4);
+  // V_H = IB/(n·q·t) where n=1e28 m⁻³ (typical semiconductor), t=0.005m (5mm thick)
+  const n = 1e22; // carrier density m⁻³ (semiconductor-like, lower than metal)
+  const t = 0.005; // conductor thickness 5mm
+  const vh = (hallI * hallB / (n * PHYS.e * t));
+  document.getElementById('hall-ro-vh').textContent = vh.toFixed(4);
   document.getElementById('hall-ro-d').textContent = hallB > 2 ? 'high' : hallB > 1 ? 'med' : 'low';
 }
 
 function hallReset() {
   if (animLoops.hall) { cancelAnimationFrame(animLoops.hall); delete animLoops.hall; }
-  if (hallRenderer) { if (hallRenderer._ro) hallRenderer._ro.disconnect(); hallRenderer.dispose(); }
+  if (hallRenderer) hallRenderer.dispose();
   
   hallScene = createBaseScene(0x050709);
   addLights(hallScene);
@@ -1307,8 +1652,7 @@ function hallReset() {
   
   const wrap = document.getElementById('hall-3d-wrap');
   hallRenderer = createRenderer('hall-3d-wrap');
-  hallCamera = createCamera(wrap.clientWidth || 800, 480, 9);
-  hallRenderer._camera = hallCamera;
+  hallCamera = createCamera(wrap.clientWidth, wrap.clientHeight, 9);
   setupOrbit(hallRenderer, hallCamera);
   
   buildHallScene();
@@ -1336,38 +1680,34 @@ function buildHallScene() {
   const edges = new THREE.LineSegments(edgesGeo, edgesMat);
   hallScene.add(edges);
   
-  // B field arrows pointing upward (+y) through the slab
-  // Setup: I in +x, B in +y → Lorentz force on carriers is in ±z
+  // B field arrows (along +z)
   for (let x = -2; x <= 2; x += 1) {
-    const arr = makeArrow(new THREE.Vector3(0, 1, 0), new THREE.Vector3(x, -1.5, 0), 2.0, 0x00d4aa, 0.22);
+    const arr = makeArrow(new THREE.Vector3(0, 0, 1), new THREE.Vector3(x, 0, -2.5), 1.5, 0x00d4aa, 0.2);
     hallScene.add(arr);
   }
   // B label
-  addTextSprite(hallScene, 'B ↑ (+y)', new THREE.Vector3(-3.5, 0.5, 0), '#00d4aa', 20);
+  addTextSprite(hallScene, 'B →(+z)', new THREE.Vector3(-3, 1.5, 0), '#00d4aa', 20);
   
-  // Current arrow (along +x), conventional current direction
+  // Current arrow (along +x)
+  magScene; // just accessing to avoid lint
   const cArr = makeArrow(new THREE.Vector3(1, 0, 0), new THREE.Vector3(-3.5, 0, 0), 2, 0xfbbf24, 0.25);
   hallScene.add(cArr);
-  addTextSprite(hallScene, 'I (+x)', new THREE.Vector3(-4, 0.9, 0), '#fbbf24', 18);
+  addTextSprite(hallScene, 'I (+x)', new THREE.Vector3(-4, 0.8, 0), '#fbbf24', 18);
   
-  // Hall accumulation faces: for n-type electrons deflect to +z face (high z = negative Hall side)
-  // n-type: electrons go +z → +z face becomes negative, -z face becomes positive
-  // V_H = V(−z) − V(+z) > 0 for n-type (conventional: low-z face is +)
-  const plusGeo = new THREE.PlaneGeometry(4.5, 0.75);
-  const plusMat = new THREE.MeshBasicMaterial({ color: 0xf87171, transparent: true, opacity: 0.45, side: THREE.DoubleSide });
+  // Hall side indicators
+  const plusGeo = new THREE.PlaneGeometry(1, 0.7);
+  const plusMat = new THREE.MeshBasicMaterial({ color: 0xf87171, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
   const plusPlane = new THREE.Mesh(plusGeo, plusMat);
-  plusPlane.rotation.x = Math.PI/2;
-  plusPlane.position.set(0, 0.41, -1.0); // bottom face of slab top surface at z=-1 (low-z)
+  plusPlane.position.set(0, 0.4, 1.05);
   hallScene.add(plusPlane);
-  addTextSprite(hallScene, 'V_H + (n-type)', new THREE.Vector3(2.2, 0.9, -1.3), '#f87171', 15);
+  addTextSprite(hallScene, 'V_H +', new THREE.Vector3(1.5, 1.2, 1.2), '#f87171', 16);
   
-  const minusGeo = new THREE.PlaneGeometry(4.5, 0.75);
-  const minusMat = new THREE.MeshBasicMaterial({ color: 0x34d399, transparent: true, opacity: 0.45, side: THREE.DoubleSide });
+  const minusGeo = new THREE.PlaneGeometry(1, 0.7);
+  const minusMat = new THREE.MeshBasicMaterial({ color: 0x34d399, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
   const minusPlane = new THREE.Mesh(minusGeo, minusMat);
-  minusPlane.rotation.x = Math.PI/2;
-  minusPlane.position.set(0, 0.41, 1.0); // high-z face
+  minusPlane.position.set(0, 0.4, -1.05);
   hallScene.add(minusPlane);
-  addTextSprite(hallScene, 'V_H − (n-type)', new THREE.Vector3(2.2, 0.9, 1.3), '#34d399', 15);
+  addTextSprite(hallScene, 'V_H −', new THREE.Vector3(1.5, 1.2, -1.2), '#34d399', 16);
   
   // Init particles
   hallParticles = [];
@@ -1399,8 +1739,7 @@ function addTextSprite(scene, text, pos, color='#ffffff', size=18) {
 function updateHallScene() {
   const t = Date.now() * 0.001;
   // Animate particles drifting in +x, deflected in ±y by Hall force
-  // n-type: electrons deflect to +z; p-type: holes deflect to -z
-  const deflection = hallB * hallI * 0.3 * (hallType === 'n' ? 1 : -1);
+  const deflection = hallB * hallI * 0.3 * (hallType === 'n' ? -1 : 1);
   
   if (hallParticleGroup) hallScene.remove(hallParticleGroup);
   hallParticleGroup = new THREE.Group();
@@ -1450,11 +1789,13 @@ function fbqvSetAngle(v) { fbqvAngle = v; fbqvResetParticle(); updateFBQVReadout
 
 function updateFBQVReadouts() {
   const sinA = Math.sin(fbqvAngle * Math.PI/180);
-  const F = fbqvB * 1.6e-19 * fbqvV*1e6 * sinA;
+  // F = qvB sinθ, q = e = 1.602e-19 C, v in m/s
+  const F = PHYS.e * fbqvV*1e6 * fbqvB * sinA;
   document.getElementById('fbqv-ro-f').textContent = (F*1e13).toFixed(2);
   document.getElementById('fbqv-ro-sin').textContent = sinA.toFixed(3);
-  const r = (9.11e-31 * fbqvV*1e6) / (1.6e-19 * fbqvB);
-  document.getElementById('fbqv-ro-r').textContent = r.toFixed(4);
+  // r = m_e·v / (e·B) — cyclotron radius for an electron
+  const r = (PHYS.me * fbqvV*1e6) / (PHYS.e * Math.max(fbqvB, 0.001));
+  document.getElementById('fbqv-ro-r').textContent = r.toFixed(5);
   document.getElementById('fbqv-ro-mode').textContent = fbqvSubMode.toUpperCase();
 }
 
@@ -1477,7 +1818,7 @@ function fbqvResetParticle() {
 
 function fbqvReset() {
   if (animLoops.fbqv) { cancelAnimationFrame(animLoops.fbqv); delete animLoops.fbqv; }
-  if (fbqvRenderer) { if (fbqvRenderer._ro) fbqvRenderer._ro.disconnect(); fbqvRenderer.dispose(); }
+  if (fbqvRenderer) fbqvRenderer.dispose();
   
   fbqvScene = createBaseScene(0x050709);
   addLights(fbqvScene);
@@ -1485,8 +1826,7 @@ function fbqvReset() {
   
   const wrap = document.getElementById('fbqv-3d-wrap');
   fbqvRenderer = createRenderer('fbqv-3d-wrap');
-  fbqvCamera = createCamera(wrap.clientWidth || 800, 480, 9);
-  fbqvRenderer._camera = fbqvCamera;
+  fbqvCamera = createCamera(wrap.clientWidth, wrap.clientHeight, 9);
   setupOrbit(fbqvRenderer, fbqvCamera);
   
   fbqvResetParticle();
@@ -1699,11 +2039,10 @@ function cciSetDir(d) {
 function cciSetSep(v) { cciSep = v; document.getElementById('cci-ro-sep').textContent = v.toFixed(1); updateCCIReadouts(); rebuildCCIWires(); }
 
 function updateCCIReadouts() {
-  const mu0 = 4*Math.PI*1e-7;
-  const F_per_L = mu0 * cciI1 * cciI2 / (2*Math.PI * cciSep/100);
+  const F_per_L = PHYS.mu0 * cciI1 * cciI2 / (2*Math.PI * cciSep/100);
   document.getElementById('cci-ro-f').textContent = (F_per_L*1e6).toFixed(2);
   document.getElementById('cci-ro-type').textContent = cciDir === 'same' ? 'ATTRACT' : 'REPEL';
-  const B_at_2 = mu0 * cciI1 / (2*Math.PI * cciSep/100);
+  const B_at_2 = PHYS.mu0 * cciI1 / (2*Math.PI * cciSep/100);
   document.getElementById('cci-ro-b').textContent = (B_at_2*1e5).toFixed(2);
 }
 
@@ -1752,8 +2091,7 @@ function buildCCIGroup() {
   });
   
   // Force arrows between wires
-  const mu0 = 4*Math.PI*1e-7;
-  const F = mu0 * cciI1 * cciI2 / (2*Math.PI * cciSep/100);
+  const F = PHYS.mu0 * cciI1 * cciI2 / (2*Math.PI * cciSep/100);
   const forceColor = cciDir === 'same' ? 0x34d399 : 0xf87171;
   const forceDir1 = new THREE.Vector3(cciDir === 'same' ? 1 : -1, 0, 0).normalize();
   const forceDir2 = new THREE.Vector3(cciDir === 'same' ? -1 : 1, 0, 0).normalize();
@@ -1773,7 +2111,7 @@ function buildCCIGroup() {
 
 function cciReset() {
   if (animLoops.cci) { cancelAnimationFrame(animLoops.cci); delete animLoops.cci; }
-  if (cciRenderer) { if (cciRenderer._ro) cciRenderer._ro.disconnect(); cciRenderer.dispose(); }
+  if (cciRenderer) cciRenderer.dispose();
   
   cciScene = createBaseScene(0x050709);
   addLights(cciScene);
@@ -1781,8 +2119,7 @@ function cciReset() {
   
   const wrap = document.getElementById('cci-3d-wrap');
   cciRenderer = createRenderer('cci-3d-wrap');
-  cciCamera = createCamera(wrap.clientWidth || 800, 480, 9);
-  cciRenderer._camera = cciCamera;
+  cciCamera = createCamera(wrap.clientWidth, wrap.clientHeight, 9);
   setupOrbit(cciRenderer, cciCamera);
   
   buildCCIGroup();
@@ -1823,18 +2160,23 @@ function galvSetK(v) { galvK = v; updateGalvReadouts(); }
 function galvSetN(v) { galvN = v; updateGalvReadouts(); }
 
 function updateGalvReadouts() {
-  const A = 0.01; // coil area 1cm x 1cm
-  const torque = galvN * galvB * Math.abs(galvI*0.001) * A;
-  galvTargetDeflection = (galvN * galvB * galvI*0.001 * A / galvK) * (180/Math.PI) * 50;
+  const A = 1e-4; // coil area: 1cm × 1cm = 1e-4 m²
+  const I_A = galvI * 1e-3; // convert mA → A
+  const torque = galvN * galvB * Math.abs(I_A) * A; // τ = NBIA (sin90°=1 in radial field)
+  // θ = NBIA/k (in radians), convert to degrees
+  const theta_rad = (galvN * galvB * I_A * A) / galvK;
+  galvTargetDeflection = theta_rad * (180 / Math.PI);
   galvTargetDeflection = Math.max(-85, Math.min(85, galvTargetDeflection));
-  document.getElementById('galv-ro-def').textContent = Math.abs(galvTargetDeflection).toFixed(1);
-  document.getElementById('galv-ro-tor').textContent = (torque*1e6).toFixed(2);
-  document.getElementById('galv-ro-s').textContent = (galvN * galvB * A / galvK * (180/Math.PI) * 50).toFixed(1);
+  document.getElementById('galv-ro-def').textContent = Math.abs(galvTargetDeflection).toFixed(2);
+  document.getElementById('galv-ro-tor').textContent = (torque*1e6).toFixed(3);
+  // Sensitivity S = θ/I = NBA/k (°/mA) — convert rad/A to °/mA
+  const S = (galvN * galvB * A / galvK) * (180 / Math.PI) * 1e-3;
+  document.getElementById('galv-ro-s').textContent = S.toFixed(3);
 }
 
 function galvReset() {
   if (animLoops.galv) { cancelAnimationFrame(animLoops.galv); delete animLoops.galv; }
-  if (galvRenderer) { if (galvRenderer._ro) galvRenderer._ro.disconnect(); galvRenderer.dispose(); }
+  if (galvRenderer) galvRenderer.dispose();
   
   galvScene = createBaseScene(0x050709);
   addLights(galvScene);
@@ -1842,8 +2184,7 @@ function galvReset() {
   
   const wrap = document.getElementById('galv-3d-wrap');
   galvRenderer = createRenderer('galv-3d-wrap');
-  galvCamera = createCamera(wrap.clientWidth || 800, 480, 10);
-  galvRenderer._camera = galvCamera;
+  galvCamera = createCamera(wrap.clientWidth, wrap.clientHeight, 10);
   setupOrbit(galvRenderer, galvCamera);
   
   buildGalvScene();
@@ -1989,8 +2330,792 @@ function initGalv3D() { galvReset(); }
 // ============================================================
 // INIT
 // ============================================================
-// Ensure home is visible on load
 document.getElementById('home-section').style.display = '';
+
+// ============================================================
+// CATEGORY FILTER
+// ============================================================
+function filterCat(cat) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('#practicals-grid .topic-card').forEach(card => {
+    const cats = (card.dataset.cat || '').split(' ');
+    if (cat === 'all' || cats.includes(cat)) {
+      card.classList.remove('hidden');
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+}
+
+// ============================================================
+// INFO MODAL
+// ============================================================
+function openInfo(num, title, desc, formula, difficulty) {
+  const diffColors = { Easy: '#00d4aa', Medium: '#4f8eff', Hard: '#ff7b4b' };
+  document.getElementById('info-num').textContent = 'Practical ' + num;
+  document.getElementById('info-title').textContent = title;
+  document.getElementById('info-desc').textContent = desc;
+  document.getElementById('info-formula').textContent = formula;
+  document.getElementById('info-difficulty').innerHTML = `<span style="font-size:11px;font-weight:700;font-family:var(--mono);color:${diffColors[difficulty]||'#9ba3c4'}">${difficulty}</span>`;
+  document.getElementById('info-modal').style.display = 'flex';
+}
+document.getElementById('info-modal').addEventListener('click', function(e) {
+  if (e.target === this) this.style.display = 'none';
+});
+
+// ============================================================
+// EXTEND showSim to handle new sims
+// ============================================================
+const _origShowSim = showSim;
+showSim = function(id) {
+  const newSims = ['pendulum','spring','sonometer','resonance','diode'];
+  if (newSims.includes(id)) {
+    document.getElementById('home-section').style.display = 'none';
+    document.querySelectorAll('.sim-section').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById('sim-' + id);
+    if (el) {
+      el.classList.add('active');
+      setTimeout(() => {
+        if (id === 'pendulum') initPendulum3D();
+        else if (id === 'spring') initSpring3D();
+        else if (id === 'sonometer') initSonometer3D();
+        else if (id === 'resonance') initResonance3D();
+        else if (id === 'diode') initDiode3D();
+      }, 100);
+    }
+    return;
+  }
+  _origShowSim(id);
+};
+
+// ============================================================
+// SIMPLE PENDULUM 3D (#10)
+// ============================================================
+let pendScene, pendRenderer, pendCamera;
+let pendLength = 1.5, pendAngle0 = 30, pendRunning = true;
+let pendG = PHYS.g; // gravity, adjustable
+let pendAngle = 30 * Math.PI / 180, pendVel = 0;
+let pendBobMesh, pendStringLine, pendTrailPts = [], pendTrailLine;
+let pendAnim;
+
+function pendReadouts() {
+  const T = 2 * Math.PI * Math.sqrt(pendLength / pendG);
+  document.getElementById('pend-ro-t').textContent = T.toFixed(3);
+  document.getElementById('pend-ro-l').textContent = pendLength.toFixed(2);
+  document.getElementById('pend-ro-g').textContent = (4 * Math.PI * Math.PI * pendLength / (T * T)).toFixed(4);
+}
+
+function initPendulum3D() {
+  if (pendAnim) cancelAnimationFrame(pendAnim);
+  if (pendRenderer) pendRenderer.dispose();
+
+  pendScene = createBaseScene(0x050709);
+  addLights(pendScene);
+
+  // Ceiling mount
+  const pivotGeo = new THREE.SphereGeometry(0.12, 12, 12);
+  const pivotMat = new THREE.MeshPhongMaterial({ color: 0x556688, emissive: 0x223344, shininess: 80 });
+  pendScene.add(new THREE.Mesh(pivotGeo, pivotMat));
+
+  // Ceiling bar
+  const barGeo = new THREE.CylinderGeometry(0.05, 0.05, 4, 8);
+  const barMat = new THREE.MeshPhongMaterial({ color: 0x334455 });
+  const bar = new THREE.Mesh(barGeo, barMat);
+  bar.rotation.z = Math.PI / 2;
+  bar.position.y = 0;
+  pendScene.add(bar);
+
+  // String (will update)
+  const strGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, -pendLength, 0)]);
+  const strMat = new THREE.LineBasicMaterial({ color: 0xaaaaaa });
+  pendStringLine = new THREE.Line(strGeo, strMat);
+  pendScene.add(pendStringLine);
+
+  // Bob
+  const bobGeo = new THREE.SphereGeometry(0.22, 16, 16);
+  const bobMat = new THREE.MeshPhongMaterial({ color: 0xff6b35, emissive: 0xaa3310, emissiveIntensity: 0.4, shininess: 100 });
+  pendBobMesh = new THREE.Mesh(bobGeo, bobMat);
+  pendScene.add(pendBobMesh);
+
+  // Trail
+  pendTrailPts = [];
+  const trailGeo = new THREE.BufferGeometry();
+  const trailMat = new THREE.LineBasicMaterial({ color: 0x4f8eff, transparent: true, opacity: 0.4 });
+  pendTrailLine = new THREE.Line(trailGeo, trailMat);
+  pendScene.add(pendTrailLine);
+
+  const wrap = document.getElementById('pend-3d-wrap');
+  pendRenderer = createRenderer('pend-3d-wrap');
+  pendCamera = createCamera(wrap.clientWidth, wrap.clientHeight, 6);
+  pendCamera.position.set(4, 1, 5);
+  setupOrbit(pendRenderer, pendCamera);
+
+  pendAngle = pendAngle0 * Math.PI / 180;
+  pendVel = 0;
+  pendG = PHYS.g; // reset to standard gravity on init
+  pendReadouts();
+
+  let lastTimestamp = null;
+  function loop(timestamp) {
+    pendAnim = requestAnimationFrame(loop);
+    if (pendRunning) {
+      if (lastTimestamp === null) lastTimestamp = timestamp;
+      // Real dt capped at 50ms to avoid large jumps
+      const dt = Math.min((timestamp - lastTimestamp) / 1000, 0.05);
+      lastTimestamp = timestamp;
+      // Velocity Verlet integration: α = -(g/L)sinθ
+      const alpha = -(pendG / pendLength) * Math.sin(pendAngle);
+      pendVel += alpha * dt;
+      pendVel *= Math.pow(0.9990, dt * 60); // small air-resistance damping
+      pendAngle += pendVel * dt;
+    } else {
+      lastTimestamp = null;
+    }
+    const bx = Math.sin(pendAngle) * pendLength;
+    const by = -Math.cos(pendAngle) * pendLength;
+    pendBobMesh.position.set(bx, by, 0);
+    // String
+    pendStringLine.geometry.setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(bx,by,0)]);
+    // Trail
+    pendTrailPts.push(new THREE.Vector3(bx, by, 0));
+    if (pendTrailPts.length > 120) pendTrailPts.shift();
+    pendTrailLine.geometry.setFromPoints(pendTrailPts);
+    // Angle readout
+    document.getElementById('pend-ro-a').textContent = (pendAngle * 180 / Math.PI).toFixed(1);
+    pendRenderer.render(pendScene, pendCamera);
+  }
+  loop();
+}
+
+function pendSetL(v) { pendLength = v; pendAngle = pendAngle0*Math.PI/180; pendVel = 0; pendReadouts(); }
+function pendSetA(v) { pendAngle0 = v; pendAngle = v*Math.PI/180; pendVel = 0; pendReadouts(); }
+function pendSetG(v) { pendG = v; pendAngle = pendAngle0*Math.PI/180; pendVel = 0; pendReadouts(); }
+function pendToggle() { pendRunning = !pendRunning; document.getElementById('pend-play-btn').textContent = pendRunning ? '⏸ Pause' : '▶ Play'; }
+function pendReset2() { pendAngle = pendAngle0*Math.PI/180; pendVel=0; pendTrailPts=[]; pendRunning=true; document.getElementById('pend-play-btn').textContent='⏸ Pause'; }
+
+// ============================================================
+// SPRING OSCILLATION 3D (#11)
+// ============================================================
+let spr3Scene, spr3Renderer, spr3Camera;
+let sprMass = 0.2, sprK = 20, sprY = 0, sprV = 0, sprA0 = 0.5;
+let sprCoils = null, sprBobMesh2 = null;
+let sprAnim;
+
+function sprReadouts() {
+  const T = 2 * Math.PI * Math.sqrt(sprMass / sprK);
+  document.getElementById('spr-ro-t').textContent = T.toFixed(4);
+  document.getElementById('spr-ro-f').textContent = (1/T).toFixed(3);
+  document.getElementById('spr-ro-k').textContent = sprK.toFixed(1);
+}
+
+function initSpring3D() {
+  if (sprAnim) cancelAnimationFrame(sprAnim);
+  if (spr3Renderer) spr3Renderer.dispose();
+
+  spr3Scene = createBaseScene(0x050709);
+  addLights(spr3Scene);
+
+  // Ceiling
+  const ceilGeo = new THREE.BoxGeometry(2, 0.2, 0.5);
+  const ceilMat = new THREE.MeshPhongMaterial({ color: 0x334455 });
+  const ceil = new THREE.Mesh(ceilGeo, ceilMat);
+  ceil.position.y = 3;
+  spr3Scene.add(ceil);
+
+  // Spring coils group
+  sprCoils = new THREE.Group();
+  spr3Scene.add(sprCoils);
+
+  // Bob
+  const bobGeo = new THREE.BoxGeometry(0.6, 0.4, 0.4);
+  const bobMat = new THREE.MeshPhongMaterial({ color: 0x4f8eff, emissive: 0x1a3a8f, shininess: 80 });
+  sprBobMesh2 = new THREE.Mesh(bobGeo, bobMat);
+  spr3Scene.add(sprBobMesh2);
+
+  const wrap = document.getElementById('spr-3d-wrap');
+  spr3Renderer = createRenderer('spr-3d-wrap');
+  spr3Camera = createCamera(wrap.clientWidth, wrap.clientHeight, 8);
+  spr3Camera.position.set(3, 0, 7);
+  setupOrbit(spr3Renderer, spr3Camera);
+
+  const eqYinit = -sprMass * PHYS.g / sprK;
+  sprY = eqYinit + sprA0;
+  sprV = 0;
+  sprReadouts();
+
+  let sprLastT = null;
+  function buildCoilGeom(y0, y1, coils = 10) {
+    const pts = [];
+    for (let i = 0; i <= coils * 20; i++) {
+      const t = i / (coils * 20);
+      const angle = t * coils * 2 * Math.PI;
+      const yy = y0 + (y1 - y0) * t;
+      pts.push(new THREE.Vector3(Math.cos(angle) * 0.25, yy, Math.sin(angle) * 0.25));
+    }
+    return pts;
+  }
+
+  function loop(ts) {
+    sprAnim = requestAnimationFrame(loop);
+    if (sprLastT === null) sprLastT = ts;
+    const dt = Math.min((ts - sprLastT) / 1000, 0.05);
+    sprLastT = ts;
+    // Spring-mass: F = -k(y - eq) - gravity already baked into eqY
+    const eqY = -sprMass * PHYS.g / sprK;
+    const F = -sprK * (sprY - eqY);  // restoring force only; gravity handled via eqY
+    const a = F / sprMass;
+    sprV += a * dt;
+    sprV *= Math.pow(0.9985, dt * 60); // light damping
+    sprY += sprV * dt;
+
+    sprBobMesh2.position.set(0, sprY - 0.2, 0);
+
+    // Rebuild spring coils
+    while (sprCoils.children.length) sprCoils.remove(sprCoils.children[0]);
+    const pts = buildCoilGeom(3, sprY + 0.2);
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const mat = new THREE.LineBasicMaterial({ color: 0x00d4aa });
+    sprCoils.add(new THREE.Line(geo, mat));
+
+    document.getElementById('spr-ro-y').textContent = (sprY - eqY).toFixed(3);
+    spr3Renderer.render(spr3Scene, spr3Camera);
+  }
+  loop();
+}
+
+function sprSetMass(v) { sprMass = v; const eqY = -sprMass*PHYS.g/sprK; sprY = eqY+sprA0; sprV=0; sprReadouts(); }
+function sprSetK(v) { sprK = v; const eqY = -sprMass*PHYS.g/sprK; sprY = eqY+sprA0; sprV=0; sprReadouts(); }
+function sprSetA(v) { sprA0 = v; const eqY = -sprMass*PHYS.g/sprK; sprY = eqY+v; sprV=0; }
+
+// ============================================================
+// SONOMETER 3D (#12)
+// ============================================================
+let sonScene, sonRenderer, sonCamera;
+let sonL = 0.5, sonT = 20, sonMu = 0.001;
+let sonAnim, sonWavePhase = 0;
+
+function sonFreq() { return (1/(2*sonL)) * Math.sqrt(sonT/sonMu); }
+
+function sonReadouts() {
+  const f = sonFreq();
+  document.getElementById('son-ro-f').textContent = f.toFixed(1);
+  document.getElementById('son-ro-l').textContent = sonL.toFixed(2);
+  document.getElementById('son-ro-v').textContent = Math.sqrt(sonT/sonMu).toFixed(1);
+}
+
+function initSonometer3D() {
+  if (sonAnim) cancelAnimationFrame(sonAnim);
+  if (sonRenderer) sonRenderer.dispose();
+
+  sonScene = createBaseScene(0x050709);
+  addLights(sonScene);
+
+  // Sonometer box
+  const boxGeo = new THREE.BoxGeometry(6, 0.3, 1.2);
+  const boxMat = new THREE.MeshPhongMaterial({ color: 0x5c3d1e, shininess: 40 });
+  const box = new THREE.Mesh(boxGeo, boxMat);
+  box.position.y = -1;
+  sonScene.add(box);
+
+  // Bridges
+  [-2.8, 2.8].forEach(x => {
+    const bGeo = new THREE.BoxGeometry(0.1, 0.35, 0.9);
+    const bMat = new THREE.MeshPhongMaterial({ color: 0x888888 });
+    const b = new THREE.Mesh(bGeo, bMat);
+    b.position.set(x, -0.675, 0);
+    sonScene.add(b);
+  });
+
+  const wrap = document.getElementById('son-3d-wrap');
+  sonRenderer = createRenderer('son-3d-wrap');
+  sonCamera = createCamera(wrap.clientWidth, wrap.clientHeight, 6);
+  sonCamera.position.set(0, 3, 7);
+  setupOrbit(sonRenderer, sonCamera);
+
+  sonReadouts();
+
+  function loop() {
+    sonAnim = requestAnimationFrame(loop);
+    sonWavePhase += 0.08;
+
+    // Remove old wave
+    const toRemove = [];
+    sonScene.children.forEach(c => { if (c.userData.isSonWave) toRemove.push(c); });
+    toRemove.forEach(c => sonScene.remove(c));
+
+    // Draw vibrating string
+    const pts = [];
+    const N = 80;
+    const amp = 0.2 * (sonT > 5 ? 1 : 0.5);
+    for (let i = 0; i <= N; i++) {
+      const t = i / N;
+      const x = -sonL * 3 + t * sonL * 6;
+      const y = amp * Math.sin(Math.PI * t) * Math.sin(sonWavePhase);
+      pts.push(new THREE.Vector3(x, y - 0.5, 0));
+    }
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const mat = new THREE.LineBasicMaterial({ color: 0xfbbf24, linewidth: 2 });
+    const wave = new THREE.Line(geo, mat);
+    wave.userData.isSonWave = true;
+    sonScene.add(wave);
+
+    sonRenderer.render(sonScene, sonCamera);
+  }
+  loop();
+}
+
+function sonSetL(v) { sonL = v; sonReadouts(); }
+function sonSetT(v) { sonT = v; sonReadouts(); }
+function sonSetMu(v) { sonMu = v; sonReadouts(); }
+
+// ============================================================
+// RESONANCE TUBE 3D (#14)
+// ============================================================
+let resScene, resRenderer, resCamera;
+let resF = 512, resLen = 0, resInResonance = false;
+let resAnim, resWavePhase = 0;
+
+let resTemp_C = 30; // ambient temperature in Celsius (typical Sri Lanka lab)
+function resVelocity() {
+  // v = 331.3 + 0.606·T_C  (empirical formula for dry air, valid 0–100°C)
+  return 331.3 + 0.606 * resTemp_C;
+}
+function resLambda() { return resVelocity() / resF; }
+function resL1() { return resLambda() / 4; }
+function resL2() { return 3 * resLambda() / 4; }
+
+function resReadouts() {
+  const v = resVelocity();
+  document.getElementById('res-ro-v').textContent = v.toFixed(0);
+  document.getElementById('res-ro-l1').textContent = (resL1()*100).toFixed(1);
+  document.getElementById('res-ro-l2').textContent = (resL2()*100).toFixed(1);
+  document.getElementById('res-ro-f').textContent = resF.toFixed(0);
+  // check resonance
+  const diff1 = Math.abs(resLen - resL1()*100);
+  const diff2 = Math.abs(resLen - resL2()*100);
+  resInResonance = diff1 < 3 || diff2 < 3;
+  document.getElementById('res-ro-res').textContent = resInResonance ? '✓ RESONANCE' : '✗ None';
+  document.getElementById('res-ro-res').style.color = resInResonance ? '#00d4aa' : '#ff7b4b';
+}
+
+function initResonance3D() {
+  if (resAnim) cancelAnimationFrame(resAnim);
+  if (resRenderer) resRenderer.dispose();
+
+  resScene = createBaseScene(0x050709);
+  addLights(resScene);
+
+  // Tube (open at top)
+  const tubeGeo = new THREE.CylinderGeometry(0.4, 0.4, 5, 16, 1, true);
+  const tubeMat = new THREE.MeshPhongMaterial({ color: 0x334455, transparent: true, opacity: 0.4, side: THREE.DoubleSide });
+  const tube = new THREE.Mesh(tubeGeo, tubeMat);
+  tube.position.y = 0;
+  resScene.add(tube);
+
+  // Tube bottom
+  const botGeo = new THREE.CircleGeometry(0.4, 16);
+  const botMat = new THREE.MeshPhongMaterial({ color: 0x334455 });
+  const bot = new THREE.Mesh(botGeo, botMat);
+  bot.rotation.x = -Math.PI/2;
+  bot.position.y = -2.5;
+  resScene.add(bot);
+
+  // Tuning fork (simplified)
+  [-0.2, 0.2].forEach(x => {
+    const tineGeo = new THREE.CylinderGeometry(0.04, 0.04, 1.5, 8);
+    const tineMat = new THREE.MeshPhongMaterial({ color: 0xaaaaaa, shininess: 80 });
+    const tine = new THREE.Mesh(tineGeo, tineMat);
+    tine.position.set(x + 0.6, 3, 0);
+    resScene.add(tine);
+  });
+  const handleGeo = new THREE.CylinderGeometry(0.05, 0.05, 1.5, 8);
+  const handleMat = new THREE.MeshPhongMaterial({ color: 0x888888 });
+  const handle = new THREE.Mesh(handleGeo, handleMat);
+  handle.position.set(0.6, 1.5, 0);
+  resScene.add(handle);
+
+  const wrap = document.getElementById('res-3d-wrap');
+  resRenderer = createRenderer('res-3d-wrap');
+  resCamera = createCamera(wrap.clientWidth, wrap.clientHeight, 8);
+  resCamera.position.set(4, 2, 8);
+  setupOrbit(resRenderer, resCamera);
+
+  resLen = resL1() * 100;
+  document.getElementById('res-len-slider').value = resLen.toFixed(0);
+  document.getElementById('res-lenval').textContent = resLen.toFixed(1) + 'cm';
+  resReadouts();
+
+  function loop() {
+    resAnim = requestAnimationFrame(loop);
+    resWavePhase += 0.07;
+
+    const toRm = [];
+    resScene.children.forEach(c => { if (c.userData.isResWave) toRm.push(c); });
+    toRm.forEach(c => resScene.remove(c));
+
+    const lenScaled = (resLen / 100) * 5 / 0.5;
+    const amp = resInResonance ? 0.25 : 0.08;
+
+    // Standing wave inside tube
+    const N = 60;
+    const pts = [];
+    for (let i = 0; i <= N; i++) {
+      const t = i / N;
+      const y = -2.5 + t * Math.min(lenScaled, 4.8);
+      const x = amp * Math.sin(Math.PI * t * (resLen < resL2()*100 ? 0.5 : 1.5)) * Math.sin(resWavePhase);
+      pts.push(new THREE.Vector3(x, y, 0));
+    }
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const c = resInResonance ? 0x00d4aa : 0x4f8eff;
+    const mat = new THREE.LineBasicMaterial({ color: c, transparent: true, opacity: resInResonance ? 1 : 0.5 });
+    const wave = new THREE.Line(geo, mat);
+    wave.userData.isResWave = true;
+    resScene.add(wave);
+
+    resRenderer.render(resScene, resCamera);
+  }
+  loop();
+}
+
+function resSetF(v) { resF = v; resLen = resL1()*100; document.getElementById('res-len-slider').value=resLen.toFixed(0); document.getElementById('res-lenval').textContent=resLen.toFixed(1)+'cm'; resReadouts(); }
+function resSetLen(v) { resLen = v; resReadouts(); }
+
+// ============================================================
+// DIODE I-V CURVE 3D (#35)
+// ============================================================
+let diodeScene, diodeRenderer, diodeCamera;
+let diodeV = 0.0, diodeTemp = 300;
+let diodeAnim;
+
+// Diode parameters
+const DIODE = {
+  Is:  1e-9,   // A — reverse saturation current (silicon, typical)
+  eta: 1.0,    // ideality factor (1 = ideal, 2 = recombination dominated)
+};
+function diodeCurrent(v) {
+  // Shockley: I = Is (exp(V/(η·Vt)) - 1)
+  const Vt = PHYS.kB * diodeTemp / PHYS.e; // thermal voltage = kT/e
+  return DIODE.Is * (Math.exp(v / (DIODE.eta * Vt)) - 1);
+}
+
+function diodeReadouts() {
+  const Vt = PHYS.kB * diodeTemp / PHYS.e;
+  const I = diodeCurrent(diodeV);
+  document.getElementById('diode-ro-v').textContent = diodeV.toFixed(3);
+  document.getElementById('diode-ro-i').textContent = (I * 1000).toFixed(4);
+  document.getElementById('diode-ro-vt').textContent = (Vt * 1000).toFixed(2);
+  // Dynamic resistance rd = ηVt / I (for forward bias); ∞ at 0
+  const rd = I > 1e-12 ? (DIODE.eta * Vt / I) : Infinity;
+  document.getElementById('diode-ro-r').textContent = isFinite(rd) ? rd.toFixed(2) : '∞';
+}
+
+function initDiode3D() {
+  if (diodeAnim) cancelAnimationFrame(diodeAnim);
+  if (diodeRenderer) diodeRenderer.dispose();
+
+  diodeScene = createBaseScene(0x050709);
+  addLights(diodeScene);
+
+  // Axes
+  const axesMat = new THREE.LineBasicMaterial({ color: 0x445566 });
+  [[new THREE.Vector3(-6,0,0),new THREE.Vector3(6,0,0)],
+   [new THREE.Vector3(0,-4,0),new THREE.Vector3(0,5,0)]].forEach(([a,b]) => {
+    diodeScene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]), axesMat));
+  });
+
+  // Grid lines
+  for (let x = -5; x <= 5; x += 1) {
+    const g = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,-4,0),new THREE.Vector3(x,5,0)]),
+      new THREE.LineBasicMaterial({ color: 0x1a2030, transparent: true, opacity: 0.5 }));
+    diodeScene.add(g);
+  }
+
+  // I-V Curve
+  const curvePts = [];
+  for (let v = -0.5; v <= 0.8; v += 0.005) {
+    const I = diodeCurrent(v);
+    const x = v * 8;
+    const y = Math.min(Math.log10(Math.max(I * 1000, 1e-9) + 1) * 1.5, 4.5);
+    curvePts.push(new THREE.Vector3(x, y, 0));
+  }
+  const curveGeo = new THREE.BufferGeometry().setFromPoints(curvePts);
+  const curveMat = new THREE.LineBasicMaterial({ color: 0x00d4aa, linewidth: 2 });
+  const diodeCurveLine = new THREE.Line(curveGeo, curveMat);
+  diodeCurveLine.userData.isDiodeCurve = true;
+  diodeScene.add(diodeCurveLine);
+
+  // Labels
+  addTextSprite(diodeScene, 'V (Volts)', new THREE.Vector3(5.5, -0.5, 0), '#9ba3c4', 14);
+  addTextSprite(diodeScene, 'I (mA)', new THREE.Vector3(-0.8, 4.8, 0), '#9ba3c4', 14);
+
+  // Moving point
+  const ptGeo = new THREE.SphereGeometry(0.15, 12, 12);
+  const ptMat = new THREE.MeshPhongMaterial({ color: 0xff6b35, emissive: 0xff3300, emissiveIntensity: 0.6 });
+  const ptMesh = new THREE.Mesh(ptGeo, ptMat);
+  diodeScene.add(ptMesh);
+  ptMesh.userData.isPoint = true;
+
+  const wrap = document.getElementById('diode-3d-wrap');
+  diodeRenderer = createRenderer('diode-3d-wrap');
+  diodeCamera = createCamera(wrap.clientWidth, wrap.clientHeight, 8);
+  diodeCamera.position.set(0, 1, 12);
+  setupOrbit(diodeRenderer, diodeCamera);
+
+  diodeReadouts();
+
+  function loop() {
+    diodeAnim = requestAnimationFrame(loop);
+    const I = diodeCurrent(diodeV);
+    const x = diodeV * 8;
+    const y = Math.min(Math.log10(Math.max(I * 1000, 1e-9) + 1) * 1.5, 4.5);
+    ptMesh.position.set(x, y, 0);
+    diodeRenderer.render(diodeScene, diodeCamera);
+  }
+  loop();
+}
+
+function diodeSetV(v) { diodeV = v; diodeReadouts(); }
+function diodeSetTemp(v) { diodeTemp = v; diodeReadouts(); rebuildDiodeCurve(); }
+function diodeSetEta(v) { DIODE.eta = v; diodeReadouts(); rebuildDiodeCurve(); }
+
+function rebuildDiodeCurve() {
+  if (!diodeScene) return;
+  // Remove existing curve
+  const toRm = [];
+  diodeScene.children.forEach(c => { if (c.userData.isDiodeCurve) toRm.push(c); });
+  toRm.forEach(c => diodeScene.remove(c));
+  // Redraw
+  const curvePts = [];
+  for (let v = -0.5; v <= 0.8; v += 0.005) {
+    const I = diodeCurrent(v);
+    const x = v * 8;
+    const y = Math.min(Math.log10(Math.max(I * 1000, 1e-9) + 1) * 1.5, 4.5);
+    curvePts.push(new THREE.Vector3(x, y, 0));
+  }
+  const curveGeo = new THREE.BufferGeometry().setFromPoints(curvePts);
+  const curveMat = new THREE.LineBasicMaterial({ color: 0x00d4aa, linewidth: 2 });
+  const curveLine = new THREE.Line(curveGeo, curveMat);
+  curveLine.userData.isDiodeCurve = true;
+  diodeScene.add(curveLine);
+}
 </script>
+<!-- ========== SIMPLE PENDULUM ========== -->
+<div id="sim-pendulum" class="sim-section">
+  <div class="section-head">
+    <div><h2>🕰️ Simple Pendulum — #10</h2><p>Determine acceleration due to gravity. T = 2π√(l/g). Adjust length and angle.</p></div>
+    <button class="btn-sm" onclick="showHome()" style="margin-left:auto">← Back</button>
+  </div>
+  <div class="sim-layout">
+    <div class="canvas-card">
+      <div class="canvas-header">
+        <div class="canvas-title"><div class="live-dot"></div>Simple Pendulum — Live 3D</div>
+        <div class="canvas-controls-top">
+          <button class="btn-sm" id="pend-play-btn" onclick="pendToggle()">⏸ Pause</button>
+          <button class="btn-sm primary" onclick="pendReset2()">Reset</button>
+        </div>
+      </div>
+      <div class="canvas-3d-wrap" id="pend-3d-wrap"><div class="canvas-hint">Drag to rotate · Scroll to zoom</div></div>
+    </div>
+    <div class="sidebar">
+      <div class="panel">
+        <div class="panel-header">Controls</div>
+        <div class="panel-body">
+          <div class="ctrl-row"><span class="ctrl-label">Length (m)</span>
+            <input type="range" min="0.3" max="3" step="0.05" value="1.5" oninput="pendSetL(+this.value);document.getElementById('pend-lval').textContent=(+this.value).toFixed(2)+'m'">
+            <span class="ctrl-val" id="pend-lval">1.50m</span></div>
+          <div class="ctrl-row"><span class="ctrl-label">Angle θ₀ (°)</span>
+            <input type="range" min="5" max="75" step="1" value="30" oninput="pendSetA(+this.value);document.getElementById('pend-aval').textContent=this.value+'°'">
+            <span class="ctrl-val" id="pend-aval">30°</span></div>
+          <div class="ctrl-row"><span class="ctrl-label">Gravity g (m/s²)</span>
+            <input type="range" min="1.6" max="24.8" step="0.1" value="9.807" oninput="pendSetG(+this.value);document.getElementById('pend-gslval').textContent=(+this.value).toFixed(2)">
+            <span class="ctrl-val" id="pend-gslval">9.81</span></div>
+        </div>
+      </div>
+      <div class="panel"><div class="panel-header">Readouts</div>
+        <div class="panel-body"><div class="readout-grid">
+          <div class="readout"><div class="readout-label">PERIOD T</div><div class="readout-val" id="pend-ro-t">—</div><div class="readout-unit">seconds</div></div>
+          <div class="readout"><div class="readout-label">LENGTH</div><div class="readout-val" id="pend-ro-l">—</div><div class="readout-unit">metres</div></div>
+          <div class="readout"><div class="readout-label">CALC. g</div><div class="readout-val" id="pend-ro-g">—</div><div class="readout-unit">m/s²</div></div>
+          <div class="readout"><div class="readout-label">ANGLE</div><div class="readout-val" id="pend-ro-a">—</div><div class="readout-unit">degrees</div></div>
+        </div></div>
+      </div>
+      <div class="panel"><div class="panel-header">Equations</div><div class="panel-body">
+        <div class="eq-block"><div class="eq-name">Period of Oscillation</div><div class="eq-formula">T = 2π√(l/g)</div>
+          <div class="eq-desc">Valid for small angles (θ &lt; 15°). For large angles the period increases. Plot T² vs l → slope = 4π²/g → determine g from gradient.</div>
+          <div class="eq-vars"><div class="eq-var"><b>T</b> = period (s)</div><div class="eq-var"><b>l</b> = length (m)</div><div class="eq-var"><b>g</b> = 9.80665 m/s² (standard) — adjust slider to explore other planets</div></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SPRING OSCILLATION ========== -->
+<div id="sim-spring" class="sim-section">
+  <div class="section-head">
+    <div><h2>🌀 Helix Spring Oscillation — #11</h2><p>Verify T² ∝ m for a spring-mass system. T = 2π√(m/k).</p></div>
+    <button class="btn-sm" onclick="showHome()" style="margin-left:auto">← Back</button>
+  </div>
+  <div class="sim-layout">
+    <div class="canvas-card">
+      <div class="canvas-header">
+        <div class="canvas-title"><div class="live-dot"></div>Spring-Mass System — Live 3D</div>
+        <div class="canvas-controls-top"><button class="btn-sm primary" onclick="sprSetMass(sprMass)">Reset</button></div>
+      </div>
+      <div class="canvas-3d-wrap" id="spr-3d-wrap"><div class="canvas-hint">Drag to rotate · Scroll to zoom</div></div>
+    </div>
+    <div class="sidebar">
+      <div class="panel"><div class="panel-header">Controls</div><div class="panel-body">
+        <div class="ctrl-row"><span class="ctrl-label">Mass (kg)</span>
+          <input type="range" min="0.05" max="1" step="0.05" value="0.2" oninput="sprSetMass(+this.value);document.getElementById('spr-mval').textContent=this.value+'kg'">
+          <span class="ctrl-val" id="spr-mval">0.20kg</span></div>
+        <div class="ctrl-row"><span class="ctrl-label">Spring k (N/m)</span>
+          <input type="range" min="5" max="80" step="1" value="20" oninput="sprSetK(+this.value);document.getElementById('spr-kval').textContent=this.value">
+          <span class="ctrl-val" id="spr-kval">20</span></div>
+        <div class="ctrl-row"><span class="ctrl-label">Amplitude (m)</span>
+          <input type="range" min="0.05" max="1" step="0.05" value="0.5" oninput="sprSetA(+this.value);document.getElementById('spr-aval').textContent=this.value+'m'">
+          <span class="ctrl-val" id="spr-aval">0.50m</span></div>
+      </div></div>
+      <div class="panel"><div class="panel-header">Readouts</div><div class="panel-body"><div class="readout-grid">
+        <div class="readout"><div class="readout-label">PERIOD T</div><div class="readout-val" id="spr-ro-t">—</div><div class="readout-unit">seconds</div></div>
+        <div class="readout"><div class="readout-label">FREQUENCY</div><div class="readout-val" id="spr-ro-f">—</div><div class="readout-unit">Hz</div></div>
+        <div class="readout"><div class="readout-label">SPRING k</div><div class="readout-val" id="spr-ro-k">—</div><div class="readout-unit">N/m</div></div>
+        <div class="readout"><div class="readout-label">DISPLACEMENT</div><div class="readout-val" id="spr-ro-y">—</div><div class="readout-unit">metres</div></div>
+      </div></div></div>
+      <div class="panel"><div class="panel-header">Equations</div><div class="panel-body">
+        <div class="eq-block"><div class="eq-name">Period</div><div class="eq-formula">T = 2π√(m/k)</div>
+          <div class="eq-desc">Plot T² vs m → slope = 4π²/k. Verify linear relationship.</div></div>
+        <div class="eq-block"><div class="eq-name">Restoring Force</div><div class="eq-formula">F = −kx</div>
+          <div class="eq-desc">Hooke's law: force proportional to extension.</div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SONOMETER ========== -->
+<div id="sim-sonometer" class="sim-section">
+  <div class="section-head">
+    <div><h2>🎵 Sonometer — #12 & #13</h2><p>Determine tuning fork frequency; verify f ∝ 1/l for stretched strings.</p></div>
+    <button class="btn-sm" onclick="showHome()" style="margin-left:auto">← Back</button>
+  </div>
+  <div class="sim-layout">
+    <div class="canvas-card">
+      <div class="canvas-header">
+        <div class="canvas-title"><div class="live-dot"></div>Sonometer — String Vibration 3D</div>
+        <div class="canvas-controls-top"><button class="btn-sm primary" onclick="sonReadouts()">Refresh</button></div>
+      </div>
+      <div class="canvas-3d-wrap" id="son-3d-wrap"><div class="canvas-hint">Drag to rotate · Scroll to zoom</div></div>
+    </div>
+    <div class="sidebar">
+      <div class="panel"><div class="panel-header">Controls</div><div class="panel-body">
+        <div class="ctrl-row"><span class="ctrl-label">Length l (m)</span>
+          <input type="range" min="0.1" max="1" step="0.01" value="0.5" oninput="sonSetL(+this.value);document.getElementById('son-lval').textContent=this.value+'m'">
+          <span class="ctrl-val" id="son-lval">0.50m</span></div>
+        <div class="ctrl-row"><span class="ctrl-label">Tension T (N)</span>
+          <input type="range" min="1" max="50" step="1" value="20" oninput="sonSetT(+this.value);document.getElementById('son-tval').textContent=this.value+'N'">
+          <span class="ctrl-val" id="son-tval">20N</span></div>
+        <div class="ctrl-row"><span class="ctrl-label">Mass/Length μ</span>
+          <input type="range" min="0.0005" max="0.005" step="0.0001" value="0.001" oninput="sonSetMu(+this.value);document.getElementById('son-muval').textContent=(+this.value).toFixed(4)">
+          <span class="ctrl-val" id="son-muval">0.0010</span></div>
+      </div></div>
+      <div class="panel"><div class="panel-header">Readouts</div><div class="panel-body"><div class="readout-grid">
+        <div class="readout"><div class="readout-label">FREQUENCY</div><div class="readout-val" id="son-ro-f">—</div><div class="readout-unit">Hz</div></div>
+        <div class="readout"><div class="readout-label">LENGTH</div><div class="readout-val" id="son-ro-l">—</div><div class="readout-unit">metres</div></div>
+        <div class="readout"><div class="readout-label">WAVE SPEED</div><div class="readout-val" id="son-ro-v">—</div><div class="readout-unit">m/s</div></div>
+      </div></div></div>
+      <div class="panel"><div class="panel-header">Equations</div><div class="panel-body">
+        <div class="eq-block"><div class="eq-name">Fundamental Frequency</div><div class="eq-formula">f = (1/2l)√(T/μ)</div>
+          <div class="eq-desc">Frequency inversely proportional to length. Plot f vs 1/l → straight line through origin.</div>
+          <div class="eq-vars"><div class="eq-var"><b>l</b> = vibrating length (m)</div><div class="eq-var"><b>T</b> = string tension (N)</div><div class="eq-var"><b>μ</b> = mass per unit length (kg/m)</div></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== RESONANCE TUBE ========== -->
+<div id="sim-resonance" class="sim-section">
+  <div class="section-head">
+    <div><h2>🔊 Resonance Tube — #14</h2><p>Determine velocity of sound using a closed resonance tube. v = 2f(l₂−l₁).</p></div>
+    <button class="btn-sm" onclick="showHome()" style="margin-left:auto">← Back</button>
+  </div>
+  <div class="sim-layout">
+    <div class="canvas-card">
+      <div class="canvas-header">
+        <div class="canvas-title"><div class="live-dot"></div>Resonance Tube — 3D Standing Wave</div>
+        <div class="canvas-controls-top"><button class="btn-sm primary" onclick="resSetF(resF)">Reset</button></div>
+      </div>
+      <div class="canvas-3d-wrap" id="res-3d-wrap"><div class="canvas-hint">Drag to rotate · Scroll to zoom</div></div>
+    </div>
+    <div class="sidebar">
+      <div class="panel"><div class="panel-header">Controls</div><div class="panel-body">
+        <div class="ctrl-row"><span class="ctrl-label">Fork Freq (Hz)</span>
+          <input type="range" min="256" max="1024" step="32" value="512" oninput="resSetF(+this.value);document.getElementById('res-fval').textContent=this.value+'Hz'">
+          <span class="ctrl-val" id="res-fval">512Hz</span></div>
+        <div class="ctrl-row"><span class="ctrl-label">Tube Length (cm)</span>
+          <input id="res-len-slider" type="range" min="5" max="80" step="0.5" value="16.7" oninput="resSetLen(+this.value);document.getElementById('res-lenval').textContent=(+this.value).toFixed(1)+'cm'">
+          <span class="ctrl-val" id="res-lenval">16.7cm</span></div>
+        <div class="ctrl-row"><span class="ctrl-label">Room Temp (°C)</span>
+          <input type="range" min="0" max="45" step="1" value="30" oninput="resTemp_C=+this.value;document.getElementById('res-tempval').textContent=this.value+'°C';resSetF(resF)">
+          <span class="ctrl-val" id="res-tempval">30°C</span></div>
+      </div></div>
+      <div class="panel"><div class="panel-header">Readouts</div><div class="panel-body"><div class="readout-grid">
+        <div class="readout"><div class="readout-label">SOUND SPEED</div><div class="readout-val" id="res-ro-v">343</div><div class="readout-unit">m/s</div></div>
+        <div class="readout"><div class="readout-label">1st RESONANCE</div><div class="readout-val" id="res-ro-l1">—</div><div class="readout-unit">cm</div></div>
+        <div class="readout"><div class="readout-label">2nd RESONANCE</div><div class="readout-val" id="res-ro-l2">—</div><div class="readout-unit">cm</div></div>
+        <div class="readout"><div class="readout-label">FREQUENCY</div><div class="readout-val" id="res-ro-f">512</div><div class="readout-unit">Hz</div></div>
+        <div class="readout" style="grid-column:span 2"><div class="readout-label">STATUS</div><div class="readout-val" id="res-ro-res" style="font-size:13px">—</div></div>
+      </div></div></div>
+      <div class="panel"><div class="panel-header">Equations</div><div class="panel-body">
+        <div class="eq-block"><div class="eq-name">Velocity of Sound</div><div class="eq-formula">v = 2f(l₂ − l₁)</div>
+          <div class="eq-desc">Measure two resonance lengths l₁ and l₂. Difference eliminates end correction e.</div></div>
+        <div class="eq-block"><div class="eq-name">End Correction</div><div class="eq-formula">e = (l₂ − 3l₁)/2</div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== DIODE I-V ========== -->
+<div id="sim-diode" class="sim-section">
+  <div class="section-head">
+    <div><h2>🔌 Semiconductor Diode I-V Curve — #35</h2><p>Construct the I-V characteristic of a forward biased p-n junction diode.</p></div>
+    <button class="btn-sm" onclick="showHome()" style="margin-left:auto">← Back</button>
+  </div>
+  <div class="sim-layout">
+    <div class="canvas-card">
+      <div class="canvas-header">
+        <div class="canvas-title"><div class="live-dot"></div>I-V Characteristic — 3D Plot</div>
+        <div class="canvas-controls-top"><button class="btn-sm primary" onclick="diodeSetV(0)">Reset</button></div>
+      </div>
+      <div class="canvas-3d-wrap" id="diode-3d-wrap"><div class="canvas-hint">Drag to rotate · Scroll to zoom</div></div>
+    </div>
+    <div class="sidebar">
+      <div class="panel"><div class="panel-header">Controls</div><div class="panel-body">
+        <div class="ctrl-row"><span class="ctrl-label">Voltage V (V)</span>
+          <input type="range" min="0" max="0.8" step="0.01" value="0" oninput="diodeSetV(+this.value);document.getElementById('diode-vval').textContent=(+this.value).toFixed(2)+'V'">
+          <span class="ctrl-val" id="diode-vval">0.00V</span></div>
+        <div class="ctrl-row"><span class="ctrl-label">Temperature (K)</span>
+          <input type="range" min="200" max="400" step="5" value="300" oninput="diodeSetTemp(+this.value);document.getElementById('diode-tval').textContent=this.value+'K'">
+          <span class="ctrl-val" id="diode-tval">300K</span></div>
+        <div class="ctrl-row"><span class="ctrl-label">Ideality η</span>
+          <input type="range" min="1" max="2" step="0.1" value="1.0" oninput="diodeSetEta(+this.value);document.getElementById('diode-etaval').textContent=(+this.value).toFixed(1)">
+          <span class="ctrl-val" id="diode-etaval">1.0</span></div>
+      </div></div>
+      <div class="panel"><div class="panel-header">Readouts</div><div class="panel-body"><div class="readout-grid">
+        <div class="readout"><div class="readout-label">VOLTAGE</div><div class="readout-val" id="diode-ro-v">0.000</div><div class="readout-unit">Volts</div></div>
+        <div class="readout"><div class="readout-label">CURRENT</div><div class="readout-val" id="diode-ro-i">0.0000</div><div class="readout-unit">mA</div></div>
+        <div class="readout"><div class="readout-label">Vt = kT/e</div><div class="readout-val" id="diode-ro-vt">25.85</div><div class="readout-unit">mV</div></div>
+        <div class="readout" style="grid-column:span 2"><div class="readout-label">DYNAMIC RESISTANCE rd = ηVt/I</div><div class="readout-val" id="diode-ro-r">∞</div><div class="readout-unit">Ω</div></div>
+      </div></div></div>
+      <div class="panel"><div class="panel-header">Equations</div><div class="panel-body">
+        <div class="eq-block"><div class="eq-name">Shockley Diode Equation</div><div class="eq-formula">I = Iₛ(e^(V/ηVₜ) − 1)</div>
+          <div class="eq-desc">Iₛ ≈ 1 nA (reverse saturation current). Vₜ = kT/e (thermal voltage). η = 1 (ideal) or 2 (recombination).</div></div>
+        <div class="eq-block"><div class="eq-name">Thermal Voltage</div><div class="eq-formula">Vₜ = k_B T / e</div>
+          <div class="eq-desc">At 300K: Vₜ = 25.85 mV. Sets the steepness of the exponential I-V knee.</div></div>
+        <div class="eq-block"><div class="eq-name">Dynamic Resistance</div><div class="eq-formula">r_d = ηVₜ / I</div>
+          <div class="eq-desc">Low at high current. Threshold voltage V_th ≈ 0.6–0.7V (Si), ~0.3V (Ge).</div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
